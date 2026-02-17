@@ -3,12 +3,16 @@
 import typer
 
 from salvo import __version__
+from salvo.cli.validate_cmd import validate
 
 app = typer.Typer(
     name="salvo",
     help="Test framework for multi-step AI agents",
     no_args_is_help=True,
 )
+
+# Register subcommands
+app.command()(validate)
 
 
 def version_callback(value: bool) -> None:
