@@ -10,27 +10,27 @@ See: .planning/PROJECT.md (updated 2026-02-17)
 ## Current Position
 
 Phase: 1 of 6 (Foundation and Scenario Loading)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: Executing
-Last activity: 2026-02-17 -- Completed 01-01-PLAN.md
+Last activity: 2026-02-17 -- Completed 01-02-PLAN.md
 
-Progress: [##........] 5%
+Progress: [###.......] 11%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 4min
-- Total execution time: 0.07 hours
+- Total plans completed: 2
+- Average duration: 4.5min
+- Total execution time: 0.15 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-foundation-and-scenario-loading | 1/3 | 4min | 4min |
+| 01-foundation-and-scenario-loading | 2/3 | 9min | 4.5min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (4min)
+- Last 5 plans: 01-01 (4min), 01-02 (5min)
 - Trend: --
 
 *Updated after each plan completion*
@@ -47,6 +47,9 @@ Recent decisions affecting current work:
 - [01-01]: Used hatchling build backend with src/ layout for clean package structure
 - [01-01]: All Pydantic models use extra='forbid' to reject unknown YAML keys early
 - [01-01]: Created venv for isolated development (Python 3.14 externally-managed)
+- [01-02]: Dotted path format for line_map keys (e.g. tools.0.name) for nested YAML position tracking
+- [01-02]: Error codes E001-E007 mapped from Pydantic error types for consistent identification
+- [01-02]: CI mode auto-detects from CI env var when --ci flag not provided
 
 ### Pending Todos
 
@@ -61,5 +64,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: Completed 01-01-PLAN.md
-Resume file: .planning/phases/01-foundation-and-scenario-loading/01-01-SUMMARY.md
+Stopped at: Completed 01-02-PLAN.md
+Resume file: .planning/phases/01-foundation-and-scenario-loading/01-02-SUMMARY.md
