@@ -1,0 +1,102 @@
+# Example Salvo scenario: Coding Assistant Bug Fix
+#
+# This scenario tests an AI coding assistant that can read files,
+# write fixes, and run tests. It verifies the agent follows the
+# correct workflow: read the failing test, inspect the source,
+# write the fix, then run tests to confirm.
+
+description: "Coding assistant fixes a failing test by reading source, identifying the bug, and applying a fix"
+tags:
+  category: "tool-use"
+  difficulty: "basic"
+
+adapter: openai
+model: gpt-4o
+
+system_prompt: |
+  You are a senior software engineer. When asked to fix a failing test,
+  you should:
+  1. Read the failing test to understand what it expects
+  2. Read the source file to find the bug
+  3. Write a corrected version of the source file
+  4. Run the test suite to verify your fix works
+
+  Always read before writing. Never guess -- inspect the actual code first.
+
+prompt: |
+  The test in tests/test_math.py is failing. Please investigate and fix the bug.
+
+tools:
+  - name: file_read
+    description: "Read the contents of a file"
+    parameters:
+      type: object
+      properties:
+        path:
+          type: string
+          description: "Path to the file to read"
+      required:
+        - path
+    mock_response: |
+      def add(a, b):
+          return a - b  # BUG: should be a + b
+
+  - name: file_write
+    description: "Write contents to a file"
+    parameters:
+      type: object
+      properties:
+        path:
+          type: string
+          description: "Path to the file to write"
+        content:
+          type: string
+          description: "Content to write to the file"
+      required:
+        - path
+        - content
+    mock_response: "File written successfully"
+
+  - name: run_tests
+    description: "Run the project test suite"
+    parameters:
+      type: object
+      properties:
+        test_path:
+          type: string
+          description: "Optional path to specific test file"
+      required: []
+    mock_response: |
+      tests/test_math.py::test_add PASSED
+      1 passed, 0 failed
+
+  - !include ../tools/example_tool.yaml
+
+assertions:
+  # The agent must read files before attempting a fix
+  - type: tool_called
+    tool: file_read
+    weight: 1.0
+    required: true
+
+  # The agent should follow the correct workflow order
+  - type: tool_sequence
+    mode: in_order
+    sequence:
+      - file_read
+      - file_write
+      - run_tests
+    weight: 2.0
+
+  # The fix should include the corrected addition operator
+  - type: output_contains
+    value: "+"
+    weight: 1.0
+
+  # Verify the agent used the file_write tool with a path argument
+  - type: jmespath
+    expression: "tool_calls[?name=='file_write'].arguments.path | [0]"
+    operator: exists
+    weight: 1.0
+
+threshold: 0.8

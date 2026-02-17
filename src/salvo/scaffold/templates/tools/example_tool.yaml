@@ -1,0 +1,18 @@
+# Shared tool definition: list_files
+# This file is referenced from scenarios using !include tools/example_tool.yaml
+# Shared tool files let you reuse tool definitions across multiple scenarios.
+
+name: list_files
+description: "List files in a directory"
+parameters:
+  type: object
+  properties:
+    directory:
+      type: string
+      description: "Directory path to list"
+  required:
+    - directory
+mock_response: |
+  src/math.py
+  tests/test_math.py
+  README.md

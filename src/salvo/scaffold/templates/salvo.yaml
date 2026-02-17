@@ -1,0 +1,9 @@
+# Salvo configuration
+# See: https://github.com/salvo-ai/salvo
+
+# Default model settings (can be overridden per scenario)
+default_adapter: openai
+default_model: gpt-4o
+
+# Directory containing scenario files
+scenarios_dir: scenarios

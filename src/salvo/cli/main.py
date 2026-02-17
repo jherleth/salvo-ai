@@ -3,6 +3,7 @@
 import typer
 
 from salvo import __version__
+from salvo.cli.init_cmd import init
 from salvo.cli.validate_cmd import validate
 
 app = typer.Typer(
@@ -12,6 +13,7 @@ app = typer.Typer(
 )
 
 # Register subcommands
+app.command()(init)
 app.command()(validate)
 
 
