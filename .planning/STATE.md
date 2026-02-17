@@ -9,29 +9,29 @@ See: .planning/PROJECT.md (updated 2026-02-17)
 
 ## Current Position
 
-Phase: 1 of 6 (Foundation and Scenario Loading)
-Plan: 2 of 3 in current phase
-Status: Executing
-Last activity: 2026-02-17 -- Completed 01-02-PLAN.md
+Phase: 1 of 6 (Foundation and Scenario Loading) -- COMPLETE
+Plan: 3 of 3 in current phase
+Status: Phase Complete
+Last activity: 2026-02-17 -- Completed 01-03-PLAN.md (Phase 1 done)
 
-Progress: [###.......] 11%
+Progress: [####......] 17%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 4.5min
-- Total execution time: 0.15 hours
+- Total plans completed: 3
+- Average duration: 4.3min
+- Total execution time: 0.22 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-foundation-and-scenario-loading | 2/3 | 9min | 4.5min |
+| 01-foundation-and-scenario-loading | 3/3 | 13min | 4.3min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (4min), 01-02 (5min)
-- Trend: --
+- Last 5 plans: 01-01 (4min), 01-02 (5min), 01-03 (4min)
+- Trend: stable
 
 *Updated after each plan completion*
 
@@ -50,6 +50,9 @@ Recent decisions affecting current work:
 - [01-02]: Dotted path format for line_map keys (e.g. tools.0.name) for nested YAML position tracking
 - [01-02]: Error codes E001-E007 mapped from Pydantic error types for consistent identification
 - [01-02]: CI mode auto-detects from CI env var when --ci flag not provided
+- [01-03]: Include path in example.yaml uses ../tools/ since !include resolves relative to scenario file directory
+- [01-03]: Template files located via __file__ path for reliable package-relative resolution
+- [01-03]: RunStore uses atomic write-to-tmp-then-rename for both run files and index
 
 ### Pending Todos
 
@@ -64,5 +67,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: Completed 01-02-PLAN.md
-Resume file: .planning/phases/01-foundation-and-scenario-loading/01-02-SUMMARY.md
+Stopped at: Completed 01-03-PLAN.md -- Phase 1 complete
+Resume file: .planning/phases/01-foundation-and-scenario-loading/01-03-SUMMARY.md
