@@ -1,0 +1,31 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "salvo-ai"
+version = "0.1.0"
+description = "Test framework for multi-step AI agents"
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.12.0",
+    "pyyaml>=6.0",
+    "typer>=0.24.0",
+    "rich>=14.0",
+    "uuid7>=0.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov",
+]
+
+[project.scripts]
+salvo = "salvo.cli.main:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/salvo"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

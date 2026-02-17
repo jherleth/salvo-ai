@@ -1,1 +1,15 @@
 .planning/
+
+# Virtual environment
+.venv/
+
+# Salvo data
+.salvo/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
