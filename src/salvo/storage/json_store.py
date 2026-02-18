@@ -2,17 +2,20 @@
 
 Stores RunResult objects as JSON files under .salvo/runs/ with an
 index file mapping scenario names to run IDs. Stores RunTrace objects
-under .salvo/traces/ for replay. Uses atomic writes to prevent corruption.
+under .salvo/traces/ for replay. Stores TrialSuiteResult objects for
+N-trial runs with latest symlink. Uses atomic writes to prevent corruption.
 """
 
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from uuid import uuid7
 
 from salvo.execution.trace import RunTrace
 from salvo.models.result import RunResult
+from salvo.models.trial import TrialSuiteResult
 
 
 class RunStore:
@@ -155,6 +158,105 @@ class RunStore:
             return None
         content = trace_file.read_text(encoding="utf-8")
         return RunTrace.model_validate_json(content)
+
+    def save_suite_result(self, suite: TrialSuiteResult) -> str:
+        """Save a TrialSuiteResult as a JSON file and update the index.
+
+        Persists the entire N-trial suite result at .salvo/runs/{run_id}.json.
+        Uses atomic write (write to .tmp, then rename).
+
+        Args:
+            suite: The TrialSuiteResult to persist.
+
+        Returns:
+            The run ID.
+        """
+        self.ensure_dirs()
+
+        run_id = suite.run_id
+        content = suite.model_dump_json(indent=2)
+
+        # Atomic write
+        run_file = self.runs_dir / f"{run_id}.json"
+        tmp_file = self.runs_dir / f"{run_id}.json.tmp"
+        tmp_file.write_text(content, encoding="utf-8")
+        tmp_file.rename(run_file)
+
+        # Update index under scenario_name
+        self._update_index(suite.scenario_name, run_id)
+
+        return run_id
+
+    def update_latest_symlink(self, run_id: str) -> None:
+        """Create or update a 'latest' symlink pointing to the given run.
+
+        Uses atomic pattern: create symlink at tmp path, then os.replace.
+        Falls back to writing a .latest text file if symlinks fail (Windows).
+
+        Args:
+            run_id: The run ID to point 'latest' at.
+        """
+        self.ensure_dirs()
+        target = f"{run_id}.json"
+        link_path = self.runs_dir / "latest"
+
+        try:
+            # Atomic symlink: create tmp, then replace
+            tmp_link = self.runs_dir / f".latest_tmp_{run_id}"
+            # Remove stale tmp if it exists
+            if tmp_link.exists() or tmp_link.is_symlink():
+                tmp_link.unlink()
+            os.symlink(target, tmp_link)
+            os.replace(tmp_link, link_path)
+        except OSError:
+            # Fallback for systems without symlink support
+            fallback_path = self.runs_dir / ".latest"
+            fallback_path.write_text(run_id, encoding="utf-8")
+
+    def load_suite_result(self, run_id: str) -> TrialSuiteResult:
+        """Load a TrialSuiteResult from its JSON file.
+
+        Args:
+            run_id: The run ID to load.
+
+        Returns:
+            The deserialized TrialSuiteResult.
+
+        Raises:
+            FileNotFoundError: If no suite with that ID exists.
+        """
+        run_file = self.runs_dir / f"{run_id}.json"
+        content = run_file.read_text(encoding="utf-8")
+        return TrialSuiteResult.model_validate_json(content)
+
+    def load_latest_suite(self) -> TrialSuiteResult | None:
+        """Load the most recent TrialSuiteResult via the latest symlink.
+
+        Checks for the 'latest' symlink first, then falls back to the
+        '.latest' text file. Returns None if no latest exists.
+
+        Returns:
+            The deserialized TrialSuiteResult, or None.
+        """
+        link_path = self.runs_dir / "latest"
+        fallback_path = self.runs_dir / ".latest"
+
+        run_id: str | None = None
+
+        if link_path.is_symlink() or link_path.exists():
+            # Read symlink target filename, strip .json suffix
+            target = os.readlink(link_path)
+            run_id = target.removesuffix(".json")
+        elif fallback_path.exists():
+            run_id = fallback_path.read_text(encoding="utf-8").strip()
+
+        if run_id is None:
+            return None
+
+        try:
+            return self.load_suite_result(run_id)
+        except FileNotFoundError:
+            return None
 
     def _load_index(self) -> dict[str, list[str]]:
         """Load the scenario-to-runs index file.
