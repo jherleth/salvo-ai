@@ -1,8 +1,8 @@
 """JSON file storage layer for Salvo run persistence.
 
 Stores RunResult objects as JSON files under .salvo/runs/ with an
-index file mapping scenario names to run IDs. Uses atomic writes
-to prevent corruption.
+index file mapping scenario names to run IDs. Stores RunTrace objects
+under .salvo/traces/ for replay. Uses atomic writes to prevent corruption.
 """
 
 from __future__ import annotations
@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 from uuid import uuid7
 
+from salvo.execution.trace import RunTrace
 from salvo.models.result import RunResult
 
 
@@ -30,11 +31,13 @@ class RunStore:
     def __init__(self, project_root: Path) -> None:
         self.salvo_dir = project_root / ".salvo"
         self.runs_dir = self.salvo_dir / "runs"
+        self.traces_dir = self.salvo_dir / "traces"
         self.index_path = self.salvo_dir / "index.json"
 
     def ensure_dirs(self) -> None:
-        """Create .salvo/runs/ directory structure."""
+        """Create .salvo/runs/ and .salvo/traces/ directory structure."""
         self.runs_dir.mkdir(parents=True, exist_ok=True)
+        self.traces_dir.mkdir(parents=True, exist_ok=True)
 
     def save_run(self, run_result: RunResult) -> str:
         """Save a RunResult as a JSON file and update the index.
@@ -120,6 +123,38 @@ class RunStore:
             run_file.unlink()
         self._remove_from_index(run_id)
         return existed
+
+    def save_trace(self, run_id: str, trace: RunTrace) -> None:
+        """Save a RunTrace as a JSON file in .salvo/traces/.
+
+        Args:
+            run_id: The run ID to associate the trace with.
+            trace: The RunTrace to persist.
+        """
+        self.traces_dir.mkdir(parents=True, exist_ok=True)
+
+        content = trace.model_dump_json(indent=2)
+
+        # Atomic write
+        trace_file = self.traces_dir / f"{run_id}.json"
+        tmp_file = self.traces_dir / f"{run_id}.json.tmp"
+        tmp_file.write_text(content, encoding="utf-8")
+        tmp_file.rename(trace_file)
+
+    def load_trace(self, run_id: str) -> RunTrace | None:
+        """Load a RunTrace from its JSON file.
+
+        Args:
+            run_id: The run ID whose trace to load.
+
+        Returns:
+            The deserialized RunTrace, or None if no trace exists.
+        """
+        trace_file = self.traces_dir / f"{run_id}.json"
+        if not trace_file.exists():
+            return None
+        content = trace_file.read_text(encoding="utf-8")
+        return RunTrace.model_validate_json(content)
 
     def _load_index(self) -> dict[str, list[str]]:
         """Load the scenario-to-runs index file.
