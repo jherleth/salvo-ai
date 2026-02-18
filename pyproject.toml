@@ -13,6 +13,7 @@ dependencies = [
     "typer>=0.24.0",
     "rich>=14.0",
     "uuid7>=0.1.0",
+    "jmespath>=1.1.0",
 ]
 
 [project.optional-dependencies]
