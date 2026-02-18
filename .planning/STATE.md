@@ -5,33 +5,33 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** When you change your agent, Salvo tells you whether it still works -- across the full multi-step trajectory.
-**Current focus:** Phase 2: Adapter Layer and Single-Run Execution
+**Current focus:** Phase 2 Complete -- Ready for Phase 3: Assertion Engine
 
 ## Current Position
 
-Phase: 2 of 6 (Adapter Layer and Single-Run Execution)
-Plan: 2 of 3 in current phase
-Status: In Progress
-Last activity: 2026-02-17 -- Completed 02-02-PLAN.md
+Phase: 2 of 6 (Adapter Layer and Single-Run Execution) -- COMPLETE
+Plan: 3 of 3 in current phase (all complete)
+Status: Phase Complete
+Last activity: 2026-02-17 -- Completed 02-03-PLAN.md
 
-Progress: [######....] 33%
+Progress: [######....] 40%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
+- Total plans completed: 6
 - Average duration: 3.8min
-- Total execution time: 0.32 hours
+- Total execution time: 0.38 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation-and-scenario-loading | 3/3 | 13min | 4.3min |
-| 02-adapter-layer-and-single-run-execution | 2/3 | 7min | 3.5min |
+| 02-adapter-layer-and-single-run-execution | 3/3 | 11min | 3.7min |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (5min), 01-03 (4min), 02-01 (3min), 02-02 (4min)
+- Last 5 plans: 01-03 (4min), 02-01 (3min), 02-02 (4min), 02-03 (4min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -61,6 +61,10 @@ Recent decisions affecting current work:
 - [02-02]: Lazy-initialized AsyncOpenAI/AsyncAnthropic clients -- SDK not loaded until first send_turn()
 - [02-02]: OpenAI tool_call arguments parsed via json.loads; Anthropic tool_use input already a dict
 - [02-02]: Anthropic max_tokens defaults to 4096 when config.max_tokens is None (required param)
+- [02-03]: Pydantic for trace models (not dataclasses) for JSON serialization with model_dump/model_validate
+- [02-03]: Bearer token redaction pattern applied first to prevent partial matches from general auth pattern
+- [02-03]: RunStore.save_trace() uses separate .salvo/traces/ directory from runs for clean separation
+- [02-03]: _find_project_root() walks up from scenario file looking for .salvo/ or falls back to cwd
 
 ### Pending Todos
 
@@ -75,5 +79,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: Completed 02-02-PLAN.md
-Resume file: .planning/phases/02-adapter-layer-and-single-run-execution/02-02-SUMMARY.md
+Stopped at: Completed 02-03-PLAN.md (Phase 2 complete)
+Resume file: .planning/phases/02-adapter-layer-and-single-run-execution/02-03-SUMMARY.md
