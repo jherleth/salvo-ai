@@ -242,3 +242,114 @@ class TestAssertion:
         data = {"type": "tool_call", "unknown_field": True}
         with pytest.raises(ValidationError, match="extra_forbidden"):
             Assertion.model_validate(data)
+
+
+class TestScenarioPhase2Fields:
+    """Test Phase 2 execution fields on Scenario model."""
+
+    def _minimal(self, **overrides) -> dict:
+        """Return minimal valid scenario dict with overrides applied."""
+        base = {"model": "gpt-4o", "prompt": "test"}
+        base.update(overrides)
+        return base
+
+    def test_scenario_default_max_turns(self):
+        """max_turns defaults to 10."""
+        from salvo.models import Scenario
+
+        scenario = Scenario.model_validate(self._minimal())
+        assert scenario.max_turns == 10
+
+    def test_scenario_custom_max_turns(self):
+        """max_turns can be set to a custom value."""
+        from salvo.models import Scenario
+
+        scenario = Scenario.model_validate(self._minimal(max_turns=25))
+        assert scenario.max_turns == 25
+
+    def test_scenario_max_turns_validation_ge_1(self):
+        """max_turns rejects values less than 1."""
+        from salvo.models import Scenario
+
+        with pytest.raises(ValidationError):
+            Scenario.model_validate(self._minimal(max_turns=0))
+
+    def test_scenario_max_turns_validation_le_100(self):
+        """max_turns rejects values greater than 100."""
+        from salvo.models import Scenario
+
+        with pytest.raises(ValidationError):
+            Scenario.model_validate(self._minimal(max_turns=101))
+
+    def test_scenario_max_turns_boundary_values(self):
+        """max_turns accepts boundary values 1 and 100."""
+        from salvo.models import Scenario
+
+        s1 = Scenario.model_validate(self._minimal(max_turns=1))
+        assert s1.max_turns == 1
+        s100 = Scenario.model_validate(self._minimal(max_turns=100))
+        assert s100.max_turns == 100
+
+    def test_scenario_temperature_optional(self):
+        """temperature defaults to None."""
+        from salvo.models import Scenario
+
+        scenario = Scenario.model_validate(self._minimal())
+        assert scenario.temperature is None
+
+    def test_scenario_temperature_set(self):
+        """temperature can be set to a float value."""
+        from salvo.models import Scenario
+
+        scenario = Scenario.model_validate(self._minimal(temperature=0.7))
+        assert scenario.temperature == 0.7
+
+    def test_scenario_seed_optional(self):
+        """seed defaults to None."""
+        from salvo.models import Scenario
+
+        scenario = Scenario.model_validate(self._minimal())
+        assert scenario.seed is None
+
+    def test_scenario_seed_set(self):
+        """seed can be set to an integer value."""
+        from salvo.models import Scenario
+
+        scenario = Scenario.model_validate(self._minimal(seed=42))
+        assert scenario.seed == 42
+
+    def test_scenario_extras_default_empty(self):
+        """extras defaults to an empty dict."""
+        from salvo.models import Scenario
+
+        scenario = Scenario.model_validate(self._minimal())
+        assert scenario.extras == {}
+
+    def test_scenario_extras_accepts_dict(self):
+        """extras accepts a dictionary of provider-specific options."""
+        from salvo.models import Scenario
+
+        extras = {"top_p": 0.9, "presence_penalty": 0.5}
+        scenario = Scenario.model_validate(self._minimal(extras=extras))
+        assert scenario.extras == {"top_p": 0.9, "presence_penalty": 0.5}
+
+    def test_scenario_round_trip_with_new_fields(self):
+        """JSON serialize/deserialize preserves all Phase 2 fields."""
+        from salvo.models import Scenario
+
+        data = self._minimal(
+            max_turns=50,
+            temperature=0.3,
+            seed=123,
+            extras={"top_k": 40},
+        )
+        scenario = Scenario.model_validate(data)
+        json_str = scenario.model_dump_json()
+        restored = Scenario.model_validate_json(json_str)
+
+        assert restored.max_turns == 50
+        assert restored.temperature == 0.3
+        assert restored.seed == 123
+        assert restored.extras == {"top_k": 40}
+        assert restored.model == "gpt-4o"
+        assert restored.prompt == "test"

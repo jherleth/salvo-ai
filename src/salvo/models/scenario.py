@@ -67,3 +67,7 @@ class Scenario(BaseModel):
     tools: list[ToolDef] = Field(default_factory=list)
     assertions: list[Assertion] = Field(default_factory=list)
     threshold: float = Field(default=0.8, ge=0.0, le=1.0)
+    max_turns: int = Field(default=10, ge=1, le=100)
+    temperature: float | None = None
+    seed: int | None = None
+    extras: dict[str, Any] = Field(default_factory=dict)
