@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** When you change your agent, Salvo tells you whether it still works -- across the full multi-step trajectory.
-**Current focus:** Phase 4 In Progress -- N-Trial Runner and CLI
+**Current focus:** Phase 4 Complete -- N-Trial Runner and CLI
 
 ## Current Position
 
 Phase: 4 of 6 (N-Trial Runner and CLI)
-Plan: 2 of 3 in current phase (04-02 complete)
-Status: In Progress
-Last activity: 2026-02-18 -- Completed 04-02-PLAN.md
+Plan: 3 of 3 in current phase (04-03 complete)
+Status: Phase 4 Complete
+Last activity: 2026-02-18 -- Completed 04-03-PLAN.md
 
-Progress: [#########.] 71%
+Progress: [##########] 79%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
-- Average duration: 4.4min
-- Total execution time: 0.73 hours
+- Total plans completed: 11
+- Average duration: 4.2min
+- Total execution time: 0.77 hours
 
 **By Phase:**
 
@@ -30,15 +30,16 @@ Progress: [#########.] 71%
 | 01-foundation-and-scenario-loading | 3/3 | 13min | 4.3min |
 | 02-adapter-layer-and-single-run-execution | 3/3 | 11min | 3.7min |
 | 03-assertion-engine-and-scoring | 2/2 | 10min | 5.0min |
-| 04-n-trial-runner-and-cli | 2/3 | 11min | 5.5min |
+| 04-n-trial-runner-and-cli | 3/3 | 13min | 4.3min |
 
 **Recent Trend:**
-- Last 5 plans: 03-01 (6min), 03-02 (4min), 04-01 (5min), 04-02 (6min)
+- Last 5 plans: 03-02 (4min), 04-01 (5min), 04-02 (6min), 04-03 (2min)
 - Trend: stable
 
 *Updated after each plan completion*
 | Phase 04 P01 | 5min | 2 tasks | 8 files |
 | Phase 04 P02 | 6min | 2 tasks | 6 files |
+| Phase 04 P03 | 2min | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,10 @@ Recent decisions affecting current work:
 - [04-02]: adapter_factory closure in run_cmd calls get_adapter per trial for fresh adapter instances
 - [04-02]: Latest symlink uses atomic os.symlink+os.replace with .latest text file fallback for Windows
 - [04-02]: Updated test_cli_run.py to use side_effect factory pattern (not return_value) for N-trial compatibility
+- [04-03]: Report command imports Rich directly -- independent from output.py rendering module
+- [04-03]: _find_project_root walks up from cwd (not scenario file) since report has no scenario argument
+- [04-03]: History mode loads runs individually with skip-on-error for corrupted/incompatible entries
+- [04-03]: Verdict styling duplicated from output.py to keep report_cmd and output.py as independent modules
 
 ### Pending Todos
 
@@ -104,5 +109,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 04-02-PLAN.md
-Resume file: .planning/phases/04-n-trial-runner-and-cli/04-03-PLAN.md
+Stopped at: Completed 04-03-PLAN.md (Phase 4 complete)
+Resume file: .planning/phases/05-llm-as-judge/ (next phase)
