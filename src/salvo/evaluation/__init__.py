@@ -6,6 +6,7 @@ weighted scoring with required-assertion hard-fail logic.
 
 from __future__ import annotations
 
+from salvo.evaluation.formatting import format_eval_results
 from salvo.evaluation.normalizer import normalize_assertion, normalize_assertions
 from salvo.evaluation.evaluators import get_evaluator
 from salvo.evaluation.evaluators.base import BaseEvaluator
@@ -13,6 +14,7 @@ from salvo.evaluation.evaluators.jmespath_eval import build_trace_data
 from salvo.evaluation.scorer import compute_score, evaluate_trace
 
 __all__ = [
+    "format_eval_results",
     "normalize_assertion",
     "normalize_assertions",
     "get_evaluator",

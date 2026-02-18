@@ -68,7 +68,7 @@ def _write_scenario(tmp_path: Path, content: str | None = None) -> Path:
 
 
 def test_run_command_with_mock_adapter(tmp_path: Path):
-    """Run command with mock adapter succeeds with summary output."""
+    """Run command with mock adapter succeeds with summary output (no assertions = vacuous pass)."""
     scenario_file = _write_scenario(tmp_path)
 
     mock_adapter = CLIMockAdapter()
@@ -79,6 +79,7 @@ def test_run_command_with_mock_adapter(tmp_path: Path):
     assert "gpt-4o" in result.output
     assert "1" in result.output  # turn count
     assert "Run saved:" in result.output
+    assert "PASS" in result.output
 
 
 def test_run_command_invalid_scenario(tmp_path: Path):
@@ -210,3 +211,109 @@ def test_run_command_saves_trace(tmp_path: Path):
     assert "model" in data
     assert data["model"] == "gpt-4o"
     assert data["turn_count"] == 1
+
+
+def test_run_command_assertions_pass(tmp_path: Path):
+    """Scenario with passing assertions shows PASS and correct score."""
+    content = (
+        "model: gpt-4o\n"
+        "prompt: Say hello\n"
+        "description: Test passing assertions\n"
+        "assertions:\n"
+        "  - path: response.content\n"
+        "    contains: Mock response\n"
+    )
+    scenario_file = _write_scenario(tmp_path, content=content)
+
+    mock_adapter = CLIMockAdapter()
+    with (
+        patch("salvo.cli.run_cmd.get_adapter", return_value=mock_adapter),
+        patch("salvo.cli.run_cmd._find_project_root", return_value=tmp_path),
+    ):
+        result = runner.invoke(app, ["run", str(scenario_file)])
+
+    assert result.exit_code == 0, f"Output: {result.output}"
+    assert "PASS" in result.output
+    assert "Score: 1.00" in result.output
+
+
+def test_run_command_assertions_fail(tmp_path: Path):
+    """Scenario with failing assertions shows FAILED and exit code 1."""
+    content = (
+        "model: gpt-4o\n"
+        "prompt: Say hello\n"
+        "description: Test failing assertions\n"
+        "assertions:\n"
+        "  - path: response.content\n"
+        "    contains: NONEXISTENT_STRING\n"
+    )
+    scenario_file = _write_scenario(tmp_path, content=content)
+
+    mock_adapter = CLIMockAdapter()
+    with (
+        patch("salvo.cli.run_cmd.get_adapter", return_value=mock_adapter),
+        patch("salvo.cli.run_cmd._find_project_root", return_value=tmp_path),
+    ):
+        result = runner.invoke(app, ["run", str(scenario_file)])
+
+    assert result.exit_code == 1
+    assert "FAILED" in result.output
+    assert "Score: 0.00" in result.output
+
+
+def test_run_command_required_assertion_hard_fail(tmp_path: Path):
+    """Required assertion failure shows HARD FAIL and exit code 1."""
+    content = (
+        "model: gpt-4o\n"
+        "prompt: Say hello\n"
+        "description: Test hard fail\n"
+        "assertions:\n"
+        "  - path: response.content\n"
+        "    contains: NONEXISTENT\n"
+        "    required: true\n"
+    )
+    scenario_file = _write_scenario(tmp_path, content=content)
+
+    mock_adapter = CLIMockAdapter()
+    with (
+        patch("salvo.cli.run_cmd.get_adapter", return_value=mock_adapter),
+        patch("salvo.cli.run_cmd._find_project_root", return_value=tmp_path),
+    ):
+        result = runner.invoke(app, ["run", str(scenario_file)])
+
+    assert result.exit_code == 1
+    assert "HARD FAIL" in result.output
+
+
+def test_run_command_persists_real_score(tmp_path: Path):
+    """RunResult stored in .salvo/runs/ contains real score and passed values."""
+    content = (
+        "model: gpt-4o\n"
+        "prompt: Say hello\n"
+        "description: Test persistence\n"
+        "assertions:\n"
+        "  - path: response.content\n"
+        "    contains: Mock response\n"
+    )
+    scenario_file = _write_scenario(tmp_path, content=content)
+
+    mock_adapter = CLIMockAdapter()
+    with (
+        patch("salvo.cli.run_cmd.get_adapter", return_value=mock_adapter),
+        patch("salvo.cli.run_cmd._find_project_root", return_value=tmp_path),
+    ):
+        result = runner.invoke(app, ["run", str(scenario_file)])
+
+    assert result.exit_code == 0, f"Output: {result.output}"
+
+    # Check persisted data has real eval results
+    runs_dir = tmp_path / ".salvo" / "runs"
+    run_files = list(runs_dir.glob("*.json"))
+    assert len(run_files) == 1
+
+    data = json.loads(run_files[0].read_text())
+    assert data["passed"] is True
+    assert data["score"] == 1.0
+    assert len(data["eval_results"]) == 1
+    assert data["eval_results"][0]["assertion_type"] == "jmespath"
+    assert data["eval_results"][0]["passed"] is True

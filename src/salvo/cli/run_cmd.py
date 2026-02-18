@@ -18,6 +18,8 @@ from rich.console import Console
 
 from salvo import __version__
 from salvo.adapters.registry import get_adapter
+from salvo.evaluation.formatting import format_eval_results
+from salvo.evaluation.scorer import compute_score, evaluate_trace
 from salvo.execution.extras import validate_extras
 from salvo.execution.redaction import apply_trace_limits
 from salvo.execution.runner import ScenarioRunner, ToolMockNotFoundError
@@ -92,7 +94,16 @@ async def _run_async(scenario_path: str) -> None:
     # 6. Apply trace limits (redaction + truncation)
     trace = apply_trace_limits(trace)
 
-    # 7. Print structured summary
+    # 7. Evaluate assertions
+    assertion_dicts = [
+        a.model_dump(exclude_none=True) for a in scenario.assertions
+    ]
+    eval_results, score, passed = evaluate_trace(
+        trace, assertion_dicts, scenario.threshold
+    )
+    hard_fail = any(r.required and not r.passed for r in eval_results)
+
+    # 8. Print structured summary
     desc = scenario.description or filepath.stem
     cost_str = f"${trace.cost_usd:.6f} (estimated)" if trace.cost_usd is not None else "unknown"
     turns_suffix = " (max turns hit)" if trace.max_turns_hit else ""
@@ -111,7 +122,23 @@ async def _run_async(scenario_path: str) -> None:
     output.print(f"[bold]Hash:[/bold]     {trace.scenario_hash[:12]}...")
     output.print()
 
-    # 8. Build RunResult for persistence
+    # 9. Print evaluation results
+    eval_output = format_eval_results(
+        eval_results, score, scenario.threshold, passed, hard_fail
+    )
+    output.print(eval_output)
+    output.print()
+
+    # 10. Print pass/fail status with Rich markup
+    if hard_fail:
+        output.print("[bold red]HARD FAIL[/bold red]")
+    elif passed:
+        output.print("[bold green]PASS[/bold green]")
+    else:
+        output.print("[bold red]FAILED[/bold red]")
+    output.print()
+
+    # 11. Build RunResult for persistence
     run_id = str(uuid7())
     metadata = RunMetadata(
         scenario_name=filepath.stem,
@@ -121,8 +148,8 @@ async def _run_async(scenario_path: str) -> None:
         model=trace.model,
         adapter=scenario.adapter,
         salvo_version=__version__,
-        passed=True,  # No assertions yet (Phase 3)
-        score=0.0,  # No assertions yet (Phase 3)
+        passed=passed,
+        score=score,
         cost_usd=trace.cost_usd,
         latency_seconds=trace.latency_seconds,
     )
@@ -130,21 +157,25 @@ async def _run_async(scenario_path: str) -> None:
     run_result = RunResult(
         run_id=run_id,
         metadata=metadata,
-        eval_results=[],
-        score=0.0,
-        passed=True,
+        eval_results=eval_results,
+        score=score,
+        passed=passed,
         trace_id=run_id,
     )
 
-    # 9. Determine project root and store
+    # 12. Determine project root and store
     project_root = _find_project_root(filepath)
     store = RunStore(project_root)
 
-    # 10. Save run result and trace
+    # 13. Save run result and trace
     store.save_run(run_result)
     store.save_trace(run_id, trace)
 
     output.print(f"[dim]Run saved: {run_id}[/dim]")
+
+    # 14. Exit code 1 on failure (CI compatible)
+    if not passed:
+        raise typer.Exit(code=1)
 
 
 def _find_project_root(scenario_path: Path) -> Path:
