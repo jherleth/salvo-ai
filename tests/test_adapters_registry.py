@@ -44,14 +44,28 @@ class TestGetAdapterBuiltin:
     """Test builtin adapter name resolution."""
 
     def test_get_adapter_builtin_openai_fails_without_sdk(self) -> None:
-        """get_adapter('openai') should raise ImportError with install hint."""
-        with pytest.raises(ImportError, match=r"pip install salvo-ai\[openai\]"):
-            get_adapter("openai")
+        """get_adapter('openai') should raise ImportError with install hint when SDK missing."""
+        with patch("importlib.import_module", side_effect=ImportError("No module named 'openai'")):
+            with pytest.raises(ImportError, match=r"pip install salvo-ai\[openai\]"):
+                get_adapter("openai")
 
     def test_get_adapter_builtin_anthropic_fails_without_sdk(self) -> None:
-        """get_adapter('anthropic') should raise ImportError with install hint."""
-        with pytest.raises(ImportError, match=r"pip install salvo-ai\[anthropic\]"):
-            get_adapter("anthropic")
+        """get_adapter('anthropic') should raise ImportError with install hint when SDK missing."""
+        with patch("importlib.import_module", side_effect=ImportError("No module named 'anthropic'")):
+            with pytest.raises(ImportError, match=r"pip install salvo-ai\[anthropic\]"):
+                get_adapter("anthropic")
+
+    def test_get_adapter_builtin_openai_succeeds_with_sdk(self) -> None:
+        """get_adapter('openai') returns an OpenAIAdapter when SDK is installed."""
+        adapter = get_adapter("openai")
+        assert isinstance(adapter, BaseAdapter)
+        assert adapter.provider_name() == "openai"
+
+    def test_get_adapter_builtin_anthropic_succeeds_with_sdk(self) -> None:
+        """get_adapter('anthropic') returns an AnthropicAdapter when SDK is installed."""
+        adapter = get_adapter("anthropic")
+        assert isinstance(adapter, BaseAdapter)
+        assert adapter.provider_name() == "anthropic"
 
 
 class TestGetAdapterDottedPath:
