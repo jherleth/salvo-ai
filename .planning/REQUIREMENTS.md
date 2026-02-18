@@ -22,8 +22,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Provider Adapters
 
-- [ ] **ADPT-01**: User can run scenarios against OpenAI models (gpt-4o, gpt-4o-mini)
-- [ ] **ADPT-02**: User can run scenarios against Anthropic models (claude-sonnet-4-5, claude-haiku-4-5)
+- [x] **ADPT-01**: User can run scenarios against OpenAI models (gpt-4o, gpt-4o-mini)
+- [x] **ADPT-02**: User can run scenarios against Anthropic models (claude-sonnet-4-5, claude-haiku-4-5)
 - [x] **ADPT-03**: User can create custom adapters by subclassing BaseAdapter
 
 ### Assertion & Scoring
@@ -109,8 +109,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EXEC-02 | Phase 4 | Pending |
 | EXEC-03 | Phase 4 | Pending |
 | EXEC-04 | Phase 2 | Complete |
-| ADPT-01 | Phase 2 | Pending |
-| ADPT-02 | Phase 2 | Pending |
+| ADPT-01 | Phase 2 | Complete |
+| ADPT-02 | Phase 2 | Complete |
 | ADPT-03 | Phase 2 | Complete |
 | EVAL-01 | Phase 3 | Pending |
 | EVAL-02 | Phase 3 | Pending |
