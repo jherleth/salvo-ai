@@ -15,9 +15,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Execution
 
-- [ ] **EXEC-01**: User can run a scenario N times and see aggregated reliability metrics
-- [ ] **EXEC-02**: Each trial runs with isolated state (no cross-trial contamination)
-- [ ] **EXEC-03**: Trials can run concurrently for faster execution
+- [x] **EXEC-01**: User can run a scenario N times and see aggregated reliability metrics
+- [x] **EXEC-02**: Each trial runs with isolated state (no cross-trial contamination)
+- [x] **EXEC-03**: Trials can run concurrently for faster execution
 - [x] **EXEC-04**: Each run logs reproducibility metadata (model, provider, timestamp, seed, cost, latency, scenario version hash)
 
 ### Provider Adapters
@@ -35,7 +35,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **EVAL-05**: User can mark assertions as required (hard fail if any required assertion fails)
 - [x] **EVAL-06**: Weighted score is computed as sum(score * weight) / sum(weight), scenario passes when score >= threshold
 - [x] **EVAL-07**: Output shows per-assertion results, not just aggregate scores
-- [ ] **EVAL-08**: Output aggregates failure counts per assertion across trials so users can see which assertions fail most often
+- [x] **EVAL-08**: Output aggregates failure counts per assertion across trials so users can see which assertions fail most often
 
 ### LLM Judge
 
@@ -105,9 +105,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SCEN-01 | Phase 1 | Pending |
 | SCEN-02 | Phase 1 | Pending |
 | SCEN-03 | Phase 1 | Pending |
-| EXEC-01 | Phase 4 | Pending |
-| EXEC-02 | Phase 4 | Pending |
-| EXEC-03 | Phase 4 | Pending |
+| EXEC-01 | Phase 4 | Complete |
+| EXEC-02 | Phase 4 | Complete |
+| EXEC-03 | Phase 4 | Complete |
 | EXEC-04 | Phase 2 | Complete |
 | ADPT-01 | Phase 2 | Complete |
 | ADPT-02 | Phase 2 | Complete |
@@ -119,7 +119,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EVAL-05 | Phase 3 | Complete |
 | EVAL-06 | Phase 3 | Complete |
 | EVAL-07 | Phase 3 | Complete |
-| EVAL-08 | Phase 4 | Pending |
+| EVAL-08 | Phase 4 | Complete |
 | JUDG-01 | Phase 5 | Pending |
 | JUDG-02 | Phase 5 | Pending |
 | RECD-01 | Phase 6 | Pending |

@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** When you change your agent, Salvo tells you whether it still works -- across the full multi-step trajectory.
-**Current focus:** Phase 3 Complete -- Assertion Engine and Scoring
+**Current focus:** Phase 4 In Progress -- N-Trial Runner and CLI
 
 ## Current Position
 
-Phase: 3 of 6 (Assertion Engine and Scoring)
-Plan: 2 of 2 in current phase (03-02 complete)
-Status: Phase Complete
-Last activity: 2026-02-18 -- Completed 03-02-PLAN.md
+Phase: 4 of 6 (N-Trial Runner and CLI)
+Plan: 1 of 3 in current phase (04-01 complete)
+Status: In Progress
+Last activity: 2026-02-18 -- Completed 04-01-PLAN.md
 
-Progress: [########..] 58%
+Progress: [########..] 64%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
-- Average duration: 4.1min
-- Total execution time: 0.55 hours
+- Total plans completed: 9
+- Average duration: 4.2min
+- Total execution time: 0.63 hours
 
 **By Phase:**
 
@@ -30,13 +30,14 @@ Progress: [########..] 58%
 | 01-foundation-and-scenario-loading | 3/3 | 13min | 4.3min |
 | 02-adapter-layer-and-single-run-execution | 3/3 | 11min | 3.7min |
 | 03-assertion-engine-and-scoring | 2/2 | 10min | 5.0min |
+| 04-n-trial-runner-and-cli | 1/3 | 5min | 5.0min |
 
 **Recent Trend:**
-- Last 5 plans: 02-02 (4min), 02-03 (4min), 03-01 (6min), 03-02 (4min)
+- Last 5 plans: 02-03 (4min), 03-01 (6min), 03-02 (4min), 04-01 (5min)
 - Trend: stable
 
 *Updated after each plan completion*
-| Phase 03 P02 | 4min | 2 tasks | 9 files |
+| Phase 04 P01 | 5min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,11 @@ Recent decisions affecting current work:
 - [03-02]: format_eval_results returns plain text -- Rich markup applied only in CLI layer
 - [03-02]: model_dump(exclude_none=True) converts Assertion objects to clean dicts for evaluators
 - [03-02]: Exit code 1 on evaluation failure for CI pipeline compatibility
+- [04-01]: Hand-rolled retry (~20 lines) instead of tenacity dependency for transient error handling
+- [04-01]: adapter_factory callable (not shared instance) ensures fresh adapter per trial for state isolation
+- [04-01]: uuid7() for run_id since Python 3.14 provides it natively (monotonically sortable)
+- [04-01]: statistics.quantiles(n=100) for percentiles with guard for single-trial edge case
+- [04-01]: aggregate_failures ranks by frequency * avg_weight_lost for balanced impact ranking
 
 ### Pending Todos
 
@@ -91,5 +97,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 03-02-PLAN.md
-Resume file: .planning/phases/04-n-trial-runner-and-cli/04-01-PLAN.md
+Stopped at: Completed 04-01-PLAN.md
+Resume file: .planning/phases/04-n-trial-runner-and-cli/04-02-PLAN.md
