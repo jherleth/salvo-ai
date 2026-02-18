@@ -4,6 +4,7 @@ import typer
 
 from salvo import __version__
 from salvo.cli.init_cmd import init
+from salvo.cli.report_cmd import report as report_cmd
 from salvo.cli.run_cmd import run
 from salvo.cli.validate_cmd import validate
 
@@ -15,6 +16,7 @@ app = typer.Typer(
 
 # Register subcommands
 app.command()(init)
+app.command(name="report")(report_cmd)
 app.command()(run)
 app.command()(validate)
 
