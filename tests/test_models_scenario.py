@@ -243,6 +243,48 @@ class TestAssertion:
         with pytest.raises(ValidationError, match="extra_forbidden"):
             Assertion.model_validate(data)
 
+    def test_assertion_canonical_jmespath_form(self):
+        """Assertion accepts canonical jmespath form from normalizer."""
+        from salvo.models import Assertion
+
+        data = {
+            "type": "jmespath",
+            "expression": "response.content",
+            "operator": "contains",
+            "value": "hello",
+        }
+        assertion = Assertion.model_validate(data)
+        assert assertion.type == "jmespath"
+        assert assertion.expression == "response.content"
+        assert assertion.operator == "contains"
+        assert assertion.value == "hello"
+
+    def test_assertion_cost_limit_form(self):
+        """Assertion accepts cost_limit form with max_usd."""
+        from salvo.models import Assertion
+
+        data = {"type": "cost_limit", "max_usd": 0.05}
+        assertion = Assertion.model_validate(data)
+        assert assertion.type == "cost_limit"
+        assert assertion.max_usd == 0.05
+
+    def test_assertion_latency_limit_form(self):
+        """Assertion accepts latency_limit form with max_seconds."""
+        from salvo.models import Assertion
+
+        data = {"type": "latency_limit", "max_seconds": 10.0}
+        assertion = Assertion.model_validate(data)
+        assert assertion.type == "latency_limit"
+        assert assertion.max_seconds == 10.0
+
+    def test_assertion_still_rejects_unknown_fields_with_new_fields(self):
+        """Assertion extra='forbid' still blocks truly unknown fields."""
+        from salvo.models import Assertion
+
+        data = {"type": "jmespath", "bogus_field": True}
+        with pytest.raises(ValidationError, match="extra_forbidden"):
+            Assertion.model_validate(data)
+
 
 class TestScenarioPhase2Fields:
     """Test Phase 2 execution fields on Scenario model."""

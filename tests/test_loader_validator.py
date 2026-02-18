@@ -7,6 +7,7 @@ import pytest
 
 from salvo.loader.validator import (
     ValidationErrorDetail,
+    validate_scenario,
     validate_scenario_file,
     validate_scenario_string,
 )
@@ -152,3 +153,114 @@ class TestValidateScenarioFile:
             assert errors == []
             assert len(scenario.tools) == 1
             assert scenario.tools[0].name == "search"
+
+
+class TestValidateScenarioNormalization:
+    """Tests for assertion normalization in the validation pipeline."""
+
+    def test_operator_key_style_assertions_normalize(self):
+        """Operator-key-style assertions are normalized before Pydantic validation."""
+        raw_data = {
+            "model": "gpt-4o",
+            "prompt": "test",
+            "assertions": [
+                {"path": "response.content", "contains": "hello"},
+            ],
+        }
+        scenario, errors = validate_scenario(raw_data, {}, "")
+        assert errors == []
+        assert scenario is not None
+        assert len(scenario.assertions) == 1
+        assert scenario.assertions[0].type == "jmespath"
+        assert scenario.assertions[0].operator == "contains"
+        assert scenario.assertions[0].value == "hello"
+
+    def test_explicit_type_assertions_pass_through(self):
+        """Assertions with explicit 'type' pass through normalization unchanged."""
+        raw_data = {
+            "model": "gpt-4o",
+            "prompt": "test",
+            "assertions": [
+                {"type": "cost_limit", "max_usd": 0.05},
+            ],
+        }
+        scenario, errors = validate_scenario(raw_data, {}, "")
+        assert errors == []
+        assert scenario is not None
+        assert scenario.assertions[0].type == "cost_limit"
+        assert scenario.assertions[0].max_usd == 0.05
+
+    def test_invalid_assertion_no_type_no_operator_returns_error(self):
+        """Assertion with no type and no operator key returns normalization error."""
+        raw_data = {
+            "model": "gpt-4o",
+            "prompt": "test",
+            "assertions": [
+                {"path": "response.content", "weight": 2.0},
+            ],
+        }
+        scenario, errors = validate_scenario(raw_data, {}, "")
+        assert scenario is None
+        assert len(errors) == 1
+        assert errors[0].field == "assertions.0"
+        assert errors[0].type == "assertion_normalization_error"
+        assert "no 'type'" in errors[0].message.lower() or "no operator" in errors[0].message.lower()
+
+    def test_multiple_operator_keys_returns_error(self):
+        """Assertion with multiple operator keys returns normalization error."""
+        raw_data = {
+            "model": "gpt-4o",
+            "prompt": "test",
+            "assertions": [
+                {"path": "response.content", "contains": "hi", "eq": "hi"},
+            ],
+        }
+        scenario, errors = validate_scenario(raw_data, {}, "")
+        assert scenario is None
+        assert len(errors) == 1
+        assert errors[0].field == "assertions.0"
+        assert errors[0].type == "assertion_normalization_error"
+        assert "multiple" in errors[0].message.lower()
+
+    def test_mixed_shorthand_and_explicit_assertions(self):
+        """Scenario with mixed shorthand and explicit assertions validates correctly."""
+        raw_data = {
+            "model": "gpt-4o",
+            "prompt": "test",
+            "assertions": [
+                {"path": "response.content", "contains": "hello", "weight": 2.0},
+                {"type": "cost_limit", "max_usd": 0.10},
+                {"path": "metadata.turn_count", "lte": 5},
+            ],
+        }
+        scenario, errors = validate_scenario(raw_data, {}, "")
+        assert errors == []
+        assert scenario is not None
+        assert len(scenario.assertions) == 3
+        # First assertion: normalized from shorthand
+        assert scenario.assertions[0].type == "jmespath"
+        assert scenario.assertions[0].operator == "contains"
+        assert scenario.assertions[0].weight == 2.0
+        # Second assertion: explicit type pass-through
+        assert scenario.assertions[1].type == "cost_limit"
+        assert scenario.assertions[1].max_usd == 0.10
+        # Third assertion: normalized shorthand
+        assert scenario.assertions[2].type == "jmespath"
+        assert scenario.assertions[2].operator == "lte"
+        assert scenario.assertions[2].value == 5
+
+    def test_normalization_via_yaml_string(self):
+        """Operator-key assertions normalize through validate_scenario_string."""
+        source = (
+            "model: gpt-4o\n"
+            "prompt: test\n"
+            "assertions:\n"
+            "  - path: response.content\n"
+            "    regex: 'hello.*world'\n"
+        )
+        scenario, errors = validate_scenario_string(source)
+        assert errors == []
+        assert scenario is not None
+        assert scenario.assertions[0].type == "jmespath"
+        assert scenario.assertions[0].operator == "regex"
+        assert scenario.assertions[0].value == "hello.*world"

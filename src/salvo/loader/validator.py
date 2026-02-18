@@ -14,6 +14,7 @@ from typing import Any
 
 from pydantic import ValidationError
 
+from salvo.evaluation.normalizer import normalize_assertions
 from salvo.loader.yaml_parser import (
     YAMLParseError,
     parse_yaml_file,
@@ -104,6 +105,28 @@ def validate_scenario(
     Returns:
         Tuple of (Scenario, []) on success, or (None, errors) on failure.
     """
+    # Normalize operator-key-style assertions before Pydantic validation
+    if isinstance(raw_data.get("assertions"), list):
+        normalized: list[dict] = []
+        norm_errors: list[ValidationErrorDetail] = []
+        for idx, raw_assertion in enumerate(raw_data["assertions"]):
+            if isinstance(raw_assertion, dict):
+                try:
+                    normalized.append(normalize_assertions([raw_assertion])[0])
+                except ValueError as ve:
+                    norm_errors.append(
+                        ValidationErrorDetail(
+                            field=f"assertions.{idx}",
+                            message=str(ve),
+                            type="assertion_normalization_error",
+                        )
+                    )
+            else:
+                normalized.append(raw_assertion)
+        if norm_errors:
+            return None, norm_errors
+        raw_data["assertions"] = normalized
+
     try:
         scenario = Scenario.model_validate(raw_data)
         return scenario, []

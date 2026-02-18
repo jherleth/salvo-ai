@@ -46,6 +46,8 @@ class Assertion(BaseModel):
     value: Any = None
     expression: str | None = None
     operator: str | None = None
+    max_usd: float | None = None
+    max_seconds: float | None = None
 
 
 class Scenario(BaseModel):
