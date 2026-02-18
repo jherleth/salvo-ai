@@ -34,7 +34,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **EVAL-04**: User can set latency limits per run (pass if runtime <= max_seconds)
 - [x] **EVAL-05**: User can mark assertions as required (hard fail if any required assertion fails)
 - [x] **EVAL-06**: Weighted score is computed as sum(score * weight) / sum(weight), scenario passes when score >= threshold
-- [ ] **EVAL-07**: Output shows per-assertion results, not just aggregate scores
+- [x] **EVAL-07**: Output shows per-assertion results, not just aggregate scores
 - [ ] **EVAL-08**: Output aggregates failure counts per assertion across trials so users can see which assertions fail most often
 
 ### LLM Judge
@@ -118,7 +118,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EVAL-04 | Phase 3 | Complete |
 | EVAL-05 | Phase 3 | Complete |
 | EVAL-06 | Phase 3 | Complete |
-| EVAL-07 | Phase 3 | Pending |
+| EVAL-07 | Phase 3 | Complete |
 | EVAL-08 | Phase 4 | Pending |
 | JUDG-01 | Phase 5 | Pending |
 | JUDG-02 | Phase 5 | Pending |

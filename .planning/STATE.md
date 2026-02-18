@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** When you change your agent, Salvo tells you whether it still works -- across the full multi-step trajectory.
-**Current focus:** Phase 3 In Progress -- Assertion Engine and Scoring
+**Current focus:** Phase 3 Complete -- Assertion Engine and Scoring
 
 ## Current Position
 
 Phase: 3 of 6 (Assertion Engine and Scoring)
-Plan: 1 of 2 in current phase (03-01 complete)
-Status: In Progress
-Last activity: 2026-02-18 -- Completed 03-01-PLAN.md
+Plan: 2 of 2 in current phase (03-02 complete)
+Status: Phase Complete
+Last activity: 2026-02-18 -- Completed 03-02-PLAN.md
 
-Progress: [#######...] 50%
+Progress: [########..] 58%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
+- Total plans completed: 8
 - Average duration: 4.1min
-- Total execution time: 0.48 hours
+- Total execution time: 0.55 hours
 
 **By Phase:**
 
@@ -29,13 +29,14 @@ Progress: [#######...] 50%
 |-------|-------|-------|----------|
 | 01-foundation-and-scenario-loading | 3/3 | 13min | 4.3min |
 | 02-adapter-layer-and-single-run-execution | 3/3 | 11min | 3.7min |
-| 03-assertion-engine-and-scoring | 1/2 | 6min | 6.0min |
+| 03-assertion-engine-and-scoring | 2/2 | 10min | 5.0min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (3min), 02-02 (4min), 02-03 (4min), 03-01 (6min)
+- Last 5 plans: 02-02 (4min), 02-03 (4min), 03-01 (6min), 03-02 (4min)
 - Trend: stable
 
 *Updated after each plan completion*
+| Phase 03 P02 | 4min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -71,6 +72,11 @@ Recent decisions affecting current work:
 - [03-01]: build_trace_data creates flat dict with response/turns/tool_calls/metadata keys for JMESPath querying
 - [03-01]: Tool sequence match functions return tuple[bool, str] with divergence-pinpointing failure messages
 - [03-01]: compute_score uses sum(score*weight)/sum(weight) with zero-weight guard and hard-fail override
+- [03-02]: normalize_assertions inserted before Pydantic validation in validate_scenario to convert operator-key shorthand
+- [03-02]: max_usd and max_seconds added to Assertion model for cost_limit/latency_limit types
+- [03-02]: format_eval_results returns plain text -- Rich markup applied only in CLI layer
+- [03-02]: model_dump(exclude_none=True) converts Assertion objects to clean dicts for evaluators
+- [03-02]: Exit code 1 on evaluation failure for CI pipeline compatibility
 
 ### Pending Todos
 
@@ -85,5 +91,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 03-01-PLAN.md
-Resume file: .planning/phases/03-assertion-engine-and-scoring/03-02-PLAN.md
+Stopped at: Completed 03-02-PLAN.md
+Resume file: .planning/phases/04-n-trial-runner-and-cli/04-01-PLAN.md
