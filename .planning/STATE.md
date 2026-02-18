@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** When you change your agent, Salvo tells you whether it still works -- across the full multi-step trajectory.
-**Current focus:** Phase 2 Complete -- Ready for Phase 3: Assertion Engine
+**Current focus:** Phase 3 In Progress -- Assertion Engine and Scoring
 
 ## Current Position
 
-Phase: 2 of 6 (Adapter Layer and Single-Run Execution) -- COMPLETE
-Plan: 3 of 3 in current phase (all complete)
-Status: Phase Complete
-Last activity: 2026-02-17 -- Completed 02-03-PLAN.md
+Phase: 3 of 6 (Assertion Engine and Scoring)
+Plan: 1 of 2 in current phase (03-01 complete)
+Status: In Progress
+Last activity: 2026-02-18 -- Completed 03-01-PLAN.md
 
-Progress: [######....] 40%
+Progress: [#######...] 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 3.8min
-- Total execution time: 0.38 hours
+- Total plans completed: 7
+- Average duration: 4.1min
+- Total execution time: 0.48 hours
 
 **By Phase:**
 
@@ -29,9 +29,10 @@ Progress: [######....] 40%
 |-------|-------|-------|----------|
 | 01-foundation-and-scenario-loading | 3/3 | 13min | 4.3min |
 | 02-adapter-layer-and-single-run-execution | 3/3 | 11min | 3.7min |
+| 03-assertion-engine-and-scoring | 1/2 | 6min | 6.0min |
 
 **Recent Trend:**
-- Last 5 plans: 01-03 (4min), 02-01 (3min), 02-02 (4min), 02-03 (4min)
+- Last 5 plans: 02-01 (3min), 02-02 (4min), 02-03 (4min), 03-01 (6min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -65,6 +66,11 @@ Recent decisions affecting current work:
 - [02-03]: Bearer token redaction pattern applied first to prevent partial matches from general auth pattern
 - [02-03]: RunStore.save_trace() uses separate .salvo/traces/ directory from runs for clean separation
 - [02-03]: _find_project_root() walks up from scenario file looking for .salvo/ or falls back to cwd
+- [03-01]: EVALUATOR_REGISTRY dict pattern for O(1) type-string to evaluator-class dispatch
+- [03-01]: Canonical assertion form {type, expression, operator, value, weight, required} enables uniform processing
+- [03-01]: build_trace_data creates flat dict with response/turns/tool_calls/metadata keys for JMESPath querying
+- [03-01]: Tool sequence match functions return tuple[bool, str] with divergence-pinpointing failure messages
+- [03-01]: compute_score uses sum(score*weight)/sum(weight) with zero-weight guard and hard-fail override
 
 ### Pending Todos
 
@@ -78,6 +84,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-17
-Stopped at: Completed 02-03-PLAN.md (Phase 2 complete)
-Resume file: .planning/phases/02-adapter-layer-and-single-run-execution/02-03-SUMMARY.md
+Last session: 2026-02-18
+Stopped at: Completed 03-01-PLAN.md
+Resume file: .planning/phases/03-assertion-engine-and-scoring/03-02-PLAN.md

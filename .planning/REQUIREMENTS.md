@@ -28,12 +28,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Assertion & Scoring
 
-- [ ] **EVAL-01**: User can query structured output with JMESPath expressions (eq, ne, gt, gte, lt, lte, contains, regex)
-- [ ] **EVAL-02**: User can validate tool call sequences with three modes (EXACT, IN_ORDER, ANY_ORDER)
-- [ ] **EVAL-03**: User can set cost limits per run (pass if cost <= max_usd)
-- [ ] **EVAL-04**: User can set latency limits per run (pass if runtime <= max_seconds)
-- [ ] **EVAL-05**: User can mark assertions as required (hard fail if any required assertion fails)
-- [ ] **EVAL-06**: Weighted score is computed as sum(score * weight) / sum(weight), scenario passes when score >= threshold
+- [x] **EVAL-01**: User can query structured output with JMESPath expressions (eq, ne, gt, gte, lt, lte, contains, regex)
+- [x] **EVAL-02**: User can validate tool call sequences with three modes (EXACT, IN_ORDER, ANY_ORDER)
+- [x] **EVAL-03**: User can set cost limits per run (pass if cost <= max_usd)
+- [x] **EVAL-04**: User can set latency limits per run (pass if runtime <= max_seconds)
+- [x] **EVAL-05**: User can mark assertions as required (hard fail if any required assertion fails)
+- [x] **EVAL-06**: Weighted score is computed as sum(score * weight) / sum(weight), scenario passes when score >= threshold
 - [ ] **EVAL-07**: Output shows per-assertion results, not just aggregate scores
 - [ ] **EVAL-08**: Output aggregates failure counts per assertion across trials so users can see which assertions fail most often
 
@@ -112,12 +112,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ADPT-01 | Phase 2 | Complete |
 | ADPT-02 | Phase 2 | Complete |
 | ADPT-03 | Phase 2 | Complete |
-| EVAL-01 | Phase 3 | Pending |
-| EVAL-02 | Phase 3 | Pending |
-| EVAL-03 | Phase 3 | Pending |
-| EVAL-04 | Phase 3 | Pending |
-| EVAL-05 | Phase 3 | Pending |
-| EVAL-06 | Phase 3 | Pending |
+| EVAL-01 | Phase 3 | Complete |
+| EVAL-02 | Phase 3 | Complete |
+| EVAL-03 | Phase 3 | Complete |
+| EVAL-04 | Phase 3 | Complete |
+| EVAL-05 | Phase 3 | Complete |
+| EVAL-06 | Phase 3 | Complete |
 | EVAL-07 | Phase 3 | Pending |
 | EVAL-08 | Phase 4 | Pending |
 | JUDG-01 | Phase 5 | Pending |
