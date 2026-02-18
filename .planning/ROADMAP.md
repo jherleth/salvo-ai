@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation and Scenario Loading** - Data models, YAML parsing, validation, project scaffolding, and storage layer (completed 2026-02-17)
 - [ ] **Phase 2: Adapter Layer and Single-Run Execution** - Provider adapters (OpenAI, Anthropic, custom) and single-scenario execution
-- [ ] **Phase 3: Assertion Engine and Scoring** - All evaluator types, weighted scoring, tool call validation, and JMESPath queries
+- [x] **Phase 3: Assertion Engine and Scoring** - All evaluator types, weighted scoring, tool call validation, and JMESPath queries (completed 2026-02-18)
 - [ ] **Phase 4: N-Trial Runner and CLI** - Run N times with isolation/concurrency, Rich CLI output, reporting, and CI exit codes
 - [ ] **Phase 5: LLM Judge Evaluation** - Rubric-based LLM judge assertions with k-voting
 - [ ] **Phase 6: Record and Replay** - Trace recording, deterministic replay, and re-evaluation with updated assertions
@@ -79,11 +79,12 @@ Plans:
   3. Trials can run concurrently for faster execution (configurable parallelism)
   4. `salvo report` shows historical run summaries with failure filtering
   5. Failure breakdowns show which assertions fail most often across trials, and CLI exits with non-zero code on failure (for CI/CD)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
+- [ ] 04-01-PLAN.md -- TrialRunner engine, trial data models, retry logic, aggregate metrics, cross-trial failure ranking (TDD)
+- [ ] 04-02-PLAN.md -- Rich CLI output (verdict table, progress bar, detail sections), refactored run command with N-trial integration, suite persistence, exit codes
+- [ ] 04-03-PLAN.md -- `salvo report` command with latest run detail, history trend view, and failure filtering
 
 ### Phase 5: LLM Judge Evaluation
 **Goal**: Users can define rubric-based LLM judge assertions that produce reliable verdicts through majority voting
@@ -120,7 +121,7 @@ Note: Phases 5 and 6 depend on Phase 4 but not on each other.
 |-------|----------------|--------|-----------|
 | 1. Foundation and Scenario Loading | 3/3 | Complete    | 2026-02-17 |
 | 2. Adapter Layer and Single-Run Execution | 3/3 | Complete    | 2026-02-17 |
-| 3. Assertion Engine and Scoring | 0/2 | Not started | - |
-| 4. N-Trial Runner and CLI | 0/? | Not started | - |
+| 3. Assertion Engine and Scoring | 0/2 | Complete    | 2026-02-18 |
+| 4. N-Trial Runner and CLI | 0/3 | Not started | - |
 | 5. LLM Judge Evaluation | 0/? | Not started | - |
 | 6. Record and Replay | 0/? | Not started | - |
