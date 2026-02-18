@@ -63,11 +63,11 @@ Plans:
   3. User can set cost and latency limits that fail the run when exceeded
   4. User sees per-assertion results (not just aggregate), with weighted scores computed as sum(score * weight) / sum(weight), and the run passes when score >= threshold
   5. Required assertions cause hard failure regardless of overall score
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
+- [ ] 03-01-PLAN.md -- Assertion normalizer, evaluator infrastructure (BaseEvaluator, registry), JMESPath/tool-sequence/cost/latency evaluators, weighted scorer (TDD)
+- [ ] 03-02-PLAN.md -- Assertion model update, YAML pipeline normalization, evaluate_trace integration into `salvo run`, per-assertion output formatting
 
 ### Phase 4: N-Trial Runner and CLI
 **Goal**: Users run `salvo run` from the terminal, execute scenarios N times with reliability scoring, and see rich failure breakdowns
@@ -119,8 +119,8 @@ Note: Phases 5 and 6 depend on Phase 4 but not on each other.
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation and Scenario Loading | 3/3 | Complete    | 2026-02-17 |
-| 2. Adapter Layer and Single-Run Execution | 1/3 | In Progress | - |
-| 3. Assertion Engine and Scoring | 0/? | Not started | - |
+| 2. Adapter Layer and Single-Run Execution | 3/3 | Complete    | 2026-02-17 |
+| 3. Assertion Engine and Scoring | 0/2 | Not started | - |
 | 4. N-Trial Runner and CLI | 0/? | Not started | - |
 | 5. LLM Judge Evaluation | 0/? | Not started | - |
 | 6. Record and Replay | 0/? | Not started | - |
