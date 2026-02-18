@@ -118,8 +118,8 @@ Note: Phases 5 and 6 depend on Phase 4 but not on each other.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation and Scenario Loading | 0/3 | Complete    | 2026-02-17 |
-| 2. Adapter Layer and Single-Run Execution | 0/3 | Not started | - |
+| 1. Foundation and Scenario Loading | 3/3 | Complete    | 2026-02-17 |
+| 2. Adapter Layer and Single-Run Execution | 1/3 | In Progress | - |
 | 3. Assertion Engine and Scoring | 0/? | Not started | - |
 | 4. N-Trial Runner and CLI | 0/? | Not started | - |
 | 5. LLM Judge Evaluation | 0/? | Not started | - |
