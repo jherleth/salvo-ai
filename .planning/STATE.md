@@ -5,33 +5,34 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** When you change your agent, Salvo tells you whether it still works -- across the full multi-step trajectory.
-**Current focus:** Phase 1: Foundation and Scenario Loading
+**Current focus:** Phase 2: Adapter Layer and Single-Run Execution
 
 ## Current Position
 
-Phase: 1 of 6 (Foundation and Scenario Loading) -- COMPLETE
-Plan: 3 of 3 in current phase
-Status: Phase Complete
-Last activity: 2026-02-17 -- Completed 01-03-PLAN.md (Phase 1 done)
+Phase: 2 of 6 (Adapter Layer and Single-Run Execution)
+Plan: 1 of 3 in current phase
+Status: In Progress
+Last activity: 2026-02-17 -- Completed 02-01-PLAN.md
 
-Progress: [####......] 17%
+Progress: [####......] 22%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 4.3min
-- Total execution time: 0.22 hours
+- Total plans completed: 4
+- Average duration: 4.0min
+- Total execution time: 0.27 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation-and-scenario-loading | 3/3 | 13min | 4.3min |
+| 02-adapter-layer-and-single-run-execution | 1/3 | 3min | 3.0min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (4min), 01-02 (5min), 01-03 (4min)
-- Trend: stable
+- Last 5 plans: 01-01 (4min), 01-02 (5min), 01-03 (4min), 02-01 (3min)
+- Trend: improving
 
 *Updated after each plan completion*
 
@@ -53,6 +54,10 @@ Recent decisions affecting current work:
 - [01-03]: Include path in example.yaml uses ../tools/ since !include resolves relative to scenario file directory
 - [01-03]: Template files located via __file__ path for reliable package-relative resolution
 - [01-03]: RunStore uses atomic write-to-tmp-then-rename for both run files and index
+- [02-01]: Plain dataclasses for adapter types (not Pydantic) to avoid overhead in hot path
+- [02-01]: Lazy imports via importlib for builtin adapters -- SDK not needed until first use
+- [02-01]: frozenset for BLOCKED_KEYS in extras validation for O(1) membership test
+- [02-01]: Model aliases dict for dated Claude versions mapping to base pricing
 
 ### Pending Todos
 
@@ -67,5 +72,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: Completed 01-03-PLAN.md -- Phase 1 complete
-Resume file: .planning/phases/01-foundation-and-scenario-loading/01-03-SUMMARY.md
+Stopped at: Completed 02-01-PLAN.md
+Resume file: .planning/phases/02-adapter-layer-and-single-run-execution/02-01-SUMMARY.md
