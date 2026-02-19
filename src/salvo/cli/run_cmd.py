@@ -51,6 +51,7 @@ def run(
     early_stop: bool = typer.Option(False, "--early-stop", help="Stop when threshold unreachable or hard fail"),
     allow_infra: bool = typer.Option(False, "--allow-infra", help="Exit 0/1/2 instead of 3 on infra errors"),
     threshold: Optional[float] = typer.Option(None, "--threshold", help="Override scenario threshold"),
+    record: bool = typer.Option(False, "--record", help="Record trace for replay"),
 ) -> None:
     """Run a scenario against an LLM and display results."""
     asyncio.run(
@@ -65,6 +66,7 @@ def run(
             early_stop=early_stop,
             allow_infra=allow_infra,
             threshold_override=threshold,
+            record=record,
         )
     )
 
@@ -81,6 +83,7 @@ async def _run_async(
     early_stop: bool,
     allow_infra: bool,
     threshold_override: float | None,
+    record: bool = False,
 ) -> None:
     """Async implementation of the run command."""
     from salvo.adapters.base import AdapterConfig
@@ -178,6 +181,19 @@ async def _run_async(
             if trace is not None:
                 store.save_trace(trial.trace_id, trace)
 
+    # 12b. Record traces if --record flag set
+    if record:
+        from salvo.recording.recorder import TraceRecorder, load_project_config
+
+        proj_config = load_project_config(project_root)
+        recorder = TraceRecorder(
+            store=store,
+            project_root=project_root,
+            recording_mode=proj_config.recording.mode,
+            custom_patterns=proj_config.recording.custom_redaction_patterns or None,
+        )
+        recorder.record_suite(suite, scenario, str(filepath))
+
     # 13. Output results
     if format_json:
         output_json(suite)
@@ -191,6 +207,8 @@ async def _run_async(
             render_details(suite, output_console)
 
         output_console.print(f"[dim]Run saved: {suite.run_id}[/dim]")
+        if record:
+            output_console.print(f"[dim]Trace recorded: {suite.run_id}[/dim]")
 
     # 14. Determine exit code
     if allow_infra and verdict_value == "INFRA_ERROR":

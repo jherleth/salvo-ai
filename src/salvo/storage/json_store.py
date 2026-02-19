@@ -16,6 +16,7 @@ from uuid import uuid7
 from salvo.execution.trace import RunTrace
 from salvo.models.result import RunResult
 from salvo.models.trial import TrialSuiteResult
+from salvo.recording.models import RecordedTrace, validate_trace_version
 
 
 class RunStore:
@@ -257,6 +258,111 @@ class RunStore:
             return self.load_suite_result(run_id)
         except FileNotFoundError:
             return None
+
+    # -- Recorded trace methods --
+
+    def save_recorded_trace(self, run_id: str, recorded: RecordedTrace) -> None:
+        """Save a RecordedTrace as JSON in .salvo/traces/{run_id}.recorded.json.
+
+        Uses atomic write pattern (write .tmp, rename).
+
+        Args:
+            run_id: The trace ID to save under.
+            recorded: The RecordedTrace to persist.
+        """
+        self.traces_dir.mkdir(parents=True, exist_ok=True)
+
+        content = recorded.model_dump_json(indent=2)
+
+        # Atomic write
+        trace_file = self.traces_dir / f"{run_id}.recorded.json"
+        tmp_file = self.traces_dir / f"{run_id}.recorded.json.tmp"
+        tmp_file.write_text(content, encoding="utf-8")
+        tmp_file.rename(trace_file)
+
+    def load_recorded_trace(self, run_id: str) -> RecordedTrace | None:
+        """Load a RecordedTrace from its JSON file.
+
+        Returns None if not found. Validates the trace schema version
+        on load.
+
+        Args:
+            run_id: The trace ID to load.
+
+        Returns:
+            The deserialized RecordedTrace, or None if not found.
+        """
+        trace_file = self.traces_dir / f"{run_id}.recorded.json"
+        if not trace_file.exists():
+            return None
+        content = trace_file.read_text(encoding="utf-8")
+        recorded = RecordedTrace.model_validate_json(content)
+        validate_trace_version(recorded.metadata)
+        return recorded
+
+    def update_latest_recorded_symlink(self, run_id: str) -> None:
+        """Create or update 'latest-recorded' symlink in .salvo/traces/.
+
+        Uses atomic pattern: create symlink at tmp path, then os.replace.
+        Falls back to writing a .latest-recorded text file if symlinks fail.
+
+        Args:
+            run_id: The trace ID to point 'latest-recorded' at.
+        """
+        self.ensure_dirs()
+        target = f"{run_id}.recorded.json"
+        link_path = self.traces_dir / "latest-recorded"
+
+        try:
+            tmp_link = self.traces_dir / f".latest_recorded_tmp_{run_id}"
+            if tmp_link.exists() or tmp_link.is_symlink():
+                tmp_link.unlink()
+            os.symlink(target, tmp_link)
+            os.replace(tmp_link, link_path)
+        except OSError:
+            fallback_path = self.traces_dir / ".latest-recorded"
+            fallback_path.write_text(run_id, encoding="utf-8")
+
+    def load_latest_recorded_trace(self) -> RecordedTrace | None:
+        """Load the most recent RecordedTrace via the latest-recorded symlink.
+
+        Checks for the 'latest-recorded' symlink first, then falls back
+        to the '.latest-recorded' text file.
+
+        Returns:
+            The deserialized RecordedTrace, or None.
+        """
+        link_path = self.traces_dir / "latest-recorded"
+        fallback_path = self.traces_dir / ".latest-recorded"
+
+        run_id: str | None = None
+
+        if link_path.is_symlink() or link_path.exists():
+            target = os.readlink(link_path)
+            run_id = target.removesuffix(".recorded.json")
+        elif fallback_path.exists():
+            run_id = fallback_path.read_text(encoding="utf-8").strip()
+
+        if run_id is None:
+            return None
+
+        try:
+            return self.load_recorded_trace(run_id)
+        except FileNotFoundError:
+            return None
+
+    def list_recorded_traces(self) -> list[str]:
+        """List run IDs from .salvo/traces/*.recorded.json files.
+
+        Returns:
+            Sorted list of run ID strings (chronological via UUID7).
+        """
+        if not self.traces_dir.exists():
+            return []
+        return sorted(
+            f.name.removesuffix(".recorded.json")
+            for f in self.traces_dir.glob("*.recorded.json")
+        )
 
     def _load_index(self) -> dict[str, list[str]]:
         """Load the scenario-to-runs index file.
