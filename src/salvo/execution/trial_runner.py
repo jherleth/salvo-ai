@@ -21,7 +21,7 @@ from salvo.evaluation.aggregation import (
     compute_aggregate_metrics,
     determine_verdict,
 )
-from salvo.evaluation.scorer import evaluate_trace
+from salvo.evaluation.scorer import evaluate_trace_async
 from salvo.execution.retry import retry_with_backoff
 from salvo.models.result import EvalResult
 from salvo.models.scenario import Scenario
@@ -162,7 +162,12 @@ class TrialRunner:
                     for a in self._scenario.assertions
                 ]
 
-                eval_results, score, passed = evaluate_trace(
+                # Inject scenario reference for judge assertions
+                for a in raw_assertions:
+                    if a.get("type") == "judge":
+                        a["_scenario"] = self._scenario
+
+                eval_results, score, passed = await evaluate_trace_async(
                     trace, raw_assertions, self._threshold,
                 )
 
@@ -250,6 +255,15 @@ class TrialRunner:
         total_retries = sum(r.retries_used for r in results)
         trials_with_retries = sum(1 for r in results if r.retries_used > 0)
 
+        # Aggregate judge costs from eval result metadata
+        judge_cost = 0.0
+        has_judge = False
+        for trial in results:
+            for er in trial.eval_results:
+                if er.metadata and "judge_cost_usd" in er.metadata:
+                    judge_cost += er.metadata["judge_cost_usd"]
+                    has_judge = True
+
         # Early-stop detection
         early_stopped = len(results) < self._n_trials
         early_stop_reason: str | None = None
@@ -284,6 +298,7 @@ class TrialRunner:
             threshold=self._threshold,
             cost_total=metrics["cost_total"],
             cost_avg_per_trial=metrics["cost_avg_per_trial"],
+            judge_cost_total=judge_cost if has_judge else None,
             latency_p50=metrics["latency_p50"],
             latency_p95=metrics["latency_p95"],
             total_retries=total_retries,

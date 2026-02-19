@@ -26,3 +26,13 @@ class BaseEvaluator(ABC):
         Returns:
             EvalResult with score, passed, weight, required, and details.
         """
+
+    async def evaluate_async(
+        self, trace: RunTrace, assertion: dict
+    ) -> EvalResult:
+        """Async evaluation. Default delegates to sync evaluate().
+
+        Subclasses that need async (e.g., JudgeEvaluator) override this
+        method with their async implementation.
+        """
+        return self.evaluate(trace, assertion)

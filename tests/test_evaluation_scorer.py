@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from salvo.evaluation.scorer import compute_score, evaluate_trace
+from salvo.evaluation.scorer import compute_score, evaluate_trace, evaluate_trace_async
 from salvo.execution.trace import RunTrace, TraceMessage
 from salvo.models.result import EvalResult
 
@@ -230,4 +231,140 @@ class TestEvaluateTrace:
         eval_results, score, passed = evaluate_trace(trace, assertions, threshold=0.8)
         assert len(eval_results) == 1
         assert eval_results[0].passed is True
+        assert passed is True
+
+
+class TestEvaluateTraceAsync:
+    """Test the async evaluate_trace_async orchestration function."""
+
+    @pytest.mark.asyncio
+    async def test_evaluate_trace_async_same_as_sync(self) -> None:
+        """Verify async produces same results as sync for standard evaluators."""
+        trace = _make_trace(final_content="Hello World")
+        assertions = [
+            {
+                "type": "jmespath",
+                "expression": "response.content",
+                "operator": "contains",
+                "value": "Hello",
+                "weight": 1.0,
+                "required": False,
+            },
+        ]
+
+        sync_results, sync_score, sync_passed = evaluate_trace(
+            trace, assertions, threshold=0.8
+        )
+        async_results, async_score, async_passed = await evaluate_trace_async(
+            trace, assertions, threshold=0.8
+        )
+
+        assert len(async_results) == len(sync_results)
+        assert async_score == sync_score
+        assert async_passed == sync_passed
+        assert async_results[0].passed == sync_results[0].passed
+        assert async_results[0].score == sync_results[0].score
+
+    @pytest.mark.asyncio
+    async def test_evaluate_trace_async_with_mock_judge(self) -> None:
+        """Mock a judge evaluator returning known EvalResult, verify included."""
+        trace = _make_trace(final_content="Hello World")
+
+        mock_result = EvalResult(
+            assertion_type="judge",
+            score=0.85,
+            passed=True,
+            weight=1.0,
+            required=False,
+            details="mocked judge result",
+            metadata={
+                "judge_model": "gpt-4o-mini",
+                "judge_k": 3,
+                "judge_cost_usd": 0.003,
+                "per_criterion": [],
+            },
+        )
+
+        mock_evaluator = MagicMock()
+        mock_evaluator.evaluate_async = AsyncMock(return_value=mock_result)
+
+        assertions = [
+            {
+                "type": "judge",
+                "criteria": [{"name": "test", "description": "test", "weight": 1.0}],
+                "weight": 1.0,
+                "required": False,
+            },
+        ]
+
+        with patch(
+            "salvo.evaluation.scorer.get_evaluator",
+            return_value=mock_evaluator,
+        ):
+            results, score, passed = await evaluate_trace_async(
+                trace, assertions, threshold=0.8
+            )
+
+        assert len(results) == 1
+        assert results[0].assertion_type == "judge"
+        assert results[0].score == 0.85
+        assert results[0].passed is True
+        assert results[0].metadata["judge_model"] == "gpt-4o-mini"
+
+    @pytest.mark.asyncio
+    async def test_evaluate_trace_async_mixed_standard_and_judge(self) -> None:
+        """Mixed standard + mocked judge assertions produce correct weighted score."""
+        trace = _make_trace(final_content="Hello World")
+
+        mock_judge_result = EvalResult(
+            assertion_type="judge",
+            score=0.9,
+            passed=True,
+            weight=2.0,
+            required=False,
+            details="mocked judge",
+            metadata={"judge_model": "gpt-4o-mini", "judge_k": 3, "judge_cost_usd": 0.003},
+        )
+
+        mock_evaluator = MagicMock()
+        mock_evaluator.evaluate_async = AsyncMock(return_value=mock_judge_result)
+
+        assertions = [
+            {
+                "type": "jmespath",
+                "expression": "response.content",
+                "operator": "contains",
+                "value": "Hello",
+                "weight": 1.0,
+                "required": False,
+            },
+            {
+                "type": "judge",
+                "criteria": [{"name": "test", "description": "test", "weight": 1.0}],
+                "weight": 2.0,
+                "required": False,
+            },
+        ]
+
+        original_get_evaluator = None
+
+        def patched_get_evaluator(assertion_type: str):
+            if assertion_type == "judge":
+                return mock_evaluator
+            from salvo.evaluation.evaluators import get_evaluator as real_get
+            return real_get(assertion_type)
+
+        with patch(
+            "salvo.evaluation.scorer.get_evaluator",
+            side_effect=patched_get_evaluator,
+        ):
+            results, score, passed = await evaluate_trace_async(
+                trace, assertions, threshold=0.8
+            )
+
+        assert len(results) == 2
+        assert results[0].assertion_type == "jmespath"
+        assert results[1].assertion_type == "judge"
+        # Weighted: (1.0*1.0 + 0.9*2.0) / (1.0 + 2.0) = 2.8/3.0 ~ 0.933
+        assert score == pytest.approx(2.8 / 3.0, rel=1e-3)
         assert passed is True

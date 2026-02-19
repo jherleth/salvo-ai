@@ -7,6 +7,7 @@ run metadata, individual evaluation results, and aggregate scores.
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -36,6 +37,7 @@ class EvalResult(BaseModel):
     weight: float
     required: bool
     details: str = ""
+    metadata: dict[str, Any] | None = None
 
 
 class RunResult(BaseModel):

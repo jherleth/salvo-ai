@@ -70,3 +70,33 @@ def evaluate_trace(
     score, passed, _ = compute_score(eval_results, threshold)
 
     return (eval_results, score, passed)
+
+
+async def evaluate_trace_async(
+    trace: RunTrace,
+    assertions: list[dict],
+    threshold: float,
+) -> tuple[list[EvalResult], float, bool]:
+    """Async evaluation orchestration -- supports async evaluators.
+
+    Same contract as evaluate_trace but awaits evaluate_async() on
+    each evaluator, enabling JudgeEvaluator to make LLM calls.
+
+    Args:
+        trace: The captured run trace.
+        assertions: List of canonical assertion dicts (already normalized).
+        threshold: Minimum weighted score to pass.
+
+    Returns:
+        Tuple of (eval_results, score, passed).
+    """
+    eval_results: list[EvalResult] = []
+
+    for assertion in assertions:
+        evaluator = get_evaluator(assertion["type"])
+        result = await evaluator.evaluate_async(trace, assertion)
+        eval_results.append(result)
+
+    score, passed, _ = compute_score(eval_results, threshold)
+
+    return (eval_results, score, passed)

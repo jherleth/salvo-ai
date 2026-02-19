@@ -89,6 +89,7 @@ class TrialSuiteResult(BaseModel):
 
     cost_total: float | None = None
     cost_avg_per_trial: float | None = None
+    judge_cost_total: float | None = None
 
     latency_p50: float | None = None
     latency_p95: float | None = None

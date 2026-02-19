@@ -210,6 +210,11 @@ class JudgeEvaluator(BaseEvaluator):
                 details=(
                     f"judge_parse_failed: {parse_failures}/{k} calls failed"
                 ),
+                metadata={
+                    "judge_model": judge_model,
+                    "judge_k": k,
+                    "judge_cost_usd": total_judge_cost,
+                },
             )
 
         # Aggregate results
@@ -234,4 +239,10 @@ class JudgeEvaluator(BaseEvaluator):
             weight=weight,
             required=required,
             details=details,
+            metadata={
+                "judge_model": judge_model,
+                "judge_k": k,
+                "judge_cost_usd": total_judge_cost,
+                "per_criterion": per_criterion_details,
+            },
         )
