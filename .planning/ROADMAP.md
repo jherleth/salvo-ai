@@ -93,10 +93,11 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. User can define a rubric-based LLM judge assertion in their scenario YAML and it evaluates the agent's output against that rubric
   2. LLM judge runs k times (default 3) with majority-vote pass/fail, and the individual verdicts are visible in output
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: TBD
+- [ ] 05-01-PLAN.md -- Judge config models, prompt builder, context builder, structured extraction, k-vote aggregation, JudgeEvaluator with registry integration (TDD)
+- [ ] 05-02-PLAN.md -- Async evaluation pipeline, trial runner integration, judge cost tracking, CLI output with judge model/k/cost breakdown and per-criterion details
 
 ### Phase 6: Record and Replay
 **Goal**: Users can record agent traces and replay them deterministically without spending money on API calls
@@ -123,5 +124,5 @@ Note: Phases 5 and 6 depend on Phase 4 but not on each other.
 | 2. Adapter Layer and Single-Run Execution | 3/3 | Complete    | 2026-02-17 |
 | 3. Assertion Engine and Scoring | 0/2 | Complete    | 2026-02-18 |
 | 4. N-Trial Runner and CLI | 0/3 | Not started | - |
-| 5. LLM Judge Evaluation | 0/? | Not started | - |
+| 5. LLM Judge Evaluation | 0/2 | Not started | - |
 | 6. Record and Replay | 0/? | Not started | - |
