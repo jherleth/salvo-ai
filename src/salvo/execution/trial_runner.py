@@ -66,7 +66,6 @@ class TrialRunner:
         self._store = store
         self._project_config = project_config
         self._verbose = verbose
-        self._manifest_lock: asyncio.Lock | None = None
 
     async def run_all(
         self,
@@ -116,8 +115,6 @@ class TrialRunner:
         stop_event = asyncio.Event()
         results: list[TrialResult | None] = [None] * self._n_trials
         lock = asyncio.Lock()
-        self._manifest_lock = asyncio.Lock() if self._store is not None else None
-
         async def run_one(trial_num: int) -> None:
             if stop_event.is_set():
                 return

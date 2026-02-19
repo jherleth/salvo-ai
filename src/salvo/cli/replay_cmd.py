@@ -25,7 +25,7 @@ from salvo.storage.json_store import RunStore
 
 def replay(
     run_id: Optional[str] = typer.Argument(
-        None, help="Run ID to replay (default: latest recorded)"
+        None, help="Trace ID to replay (default: latest recorded)"
     ),
     allow_partial: bool = typer.Option(
         False,

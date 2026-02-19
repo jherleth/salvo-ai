@@ -29,7 +29,7 @@ _CONTENT_DEPENDENT_TYPES = {"jmespath", "judge", "custom"}
 
 def reeval(
     run_id: str = typer.Argument(
-        ..., help="Run ID of the recorded trace to re-evaluate"
+        ..., help="Trace ID of the recorded trace to re-evaluate"
     ),
     scenario_path: Optional[str] = typer.Option(
         None,

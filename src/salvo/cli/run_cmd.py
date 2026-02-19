@@ -208,10 +208,10 @@ async def _run_async(
 
         output_console.print(f"[dim]Run saved: {suite.run_id}[/dim]")
         if record:
-            output_console.print(f"[dim]Trace recorded: {suite.run_id}[/dim]")
+            output_console.print("[dim]Traces recorded:[/dim]")
             for trial in suite.trials:
                 output_console.print(
-                    f"[dim]  Trial {trial.trial_number}: trace_id={trial.trace_id}[/dim]"
+                    f"[dim]  Trial {trial.trial_number}: {trial.trace_id}[/dim]"
                 )
 
     # 14. Determine exit code

@@ -16,6 +16,7 @@ from salvo.recording.redaction import (
     build_redaction_pipeline,
     strip_content_for_metadata_only,
 )
+from salvo.recording.recorder import TraceRecorder
 from salvo.recording.replayer import TraceReplayer
 
 __all__ = [
@@ -23,6 +24,7 @@ __all__ = [
     "RecordedTrace",
     "RevalResult",
     "TraceMetadata",
+    "TraceRecorder",
     "TraceReplayer",
     "build_redaction_pipeline",
     "strip_content_for_metadata_only",

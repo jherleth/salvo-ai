@@ -492,23 +492,6 @@ class RunStore:
             if isinstance(entry, dict) and "trace_id" in entry
         ]
 
-    def get_latest_recorded_run_id(self) -> str | None:
-        """Get the most recent recorded run ID from the manifest.
-
-        UUID7 IDs sort chronologically, so max() gives the latest.
-
-        Returns:
-            The latest recorded run_id, or None if no recorded runs exist.
-        """
-        manifest = self.load_trace_manifest()
-        runs = manifest.get("runs", {})
-        recorded_ids = [
-            rid for rid, data in runs.items() if data.get("recorded", False)
-        ]
-        if not recorded_ids:
-            return None
-        return max(recorded_ids)
-
     def _load_index(self) -> dict[str, list[str]]:
         """Load the scenario-to-runs index file.
 
