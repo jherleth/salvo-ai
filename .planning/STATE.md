@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** When you change your agent, Salvo tells you whether it still works -- across the full multi-step trajectory.
-**Current focus:** Phase 7 - Wire Trace Pipeline
+**Current focus:** Phase 8 - Config Wiring and Defensive Hardening
 
 ## Current Position
 
-Phase: 7 of 8 (Wire Trace Pipeline)
-Plan: 1 of 1 in current phase (07-01 complete)
-Status: Phase 7 Complete
-Last activity: 2026-02-19 -- Completed 07-01-PLAN.md
+Phase: 8 of 8 (Config Wiring and Defensive Hardening)
+Plan: 1 of 1 in current phase (08-01 complete)
+Status: Phase 8 Complete
+Last activity: 2026-02-19 -- Completed 08-01-PLAN.md
 
-Progress: [##############--] 87%
+Progress: [################] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16
-- Average duration: 4.4min
-- Total execution time: 1.2 hours
+- Total plans completed: 17
+- Average duration: 4.5min
+- Total execution time: 1.3 hours
 
 **By Phase:**
 
@@ -34,9 +34,10 @@ Progress: [##############--] 87%
 | 05-llm-judge-evaluation | 2/2 | 10min | 5.0min |
 | 06-record-and-replay | 2/2 | 9min | 4.5min |
 | 07-wire-trace-pipeline | 1/1 | 4min | 4.0min |
+| 08-config-wiring-and-defensive-hardening | 1/1 | 6min | 6.0min |
 
 **Recent Trend:**
-- Last 5 plans: 05-01 (5min), 05-02 (5min), 06-01 (4min), 06-02 (5min), 07-01 (4min)
+- Last 5 plans: 05-02 (5min), 06-01 (4min), 06-02 (5min), 07-01 (4min), 08-01 (6min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -48,6 +49,7 @@ Progress: [##############--] 87%
 | Phase 06 P01 | 4min | 2 tasks | 9 files |
 | Phase 06 P02 | 5min | 2 tasks | 9 files |
 | Phase 07 P01 | 4min | 2 tasks | 6 files |
+| Phase 08 P01 | 6min | 2 tasks | 17 files |
 
 ## Accumulated Context
 
@@ -125,6 +127,9 @@ Recent decisions affecting current work:
 - [07-01]: reeval_cmd strict by default on metadata_only with content-dependent assertions; --allow-partial-reeval opts in
 - [07-01]: Scenario drift detection only when --scenario flag is provided (original snapshot hashes match by definition)
 - [07-01]: replay_cmd exits 1 on missing run_id without --allow-partial (was exit 0)
+- [08-01]: Config imports at module level in run_cmd.py for test patchability (not local import inside async function)
+- [08-01]: recorder.py load_project_config kept as thin re-export wrapper for backward compat
+- [08-01]: _verbose flag injected via assertion dict alongside _scenario and _project_judge_config (consistent injection pattern)
 
 ### Pending Todos
 
@@ -139,5 +144,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 07-01-PLAN.md
-Resume file: .planning/phases/07-wire-trace-pipeline/
+Stopped at: Completed 08-01-PLAN.md
+Resume file: .planning/phases/08-config-wiring-and-defensive-hardening/08-01-SUMMARY.md

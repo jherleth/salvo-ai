@@ -103,7 +103,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | SCEN-01 | Phase 1 | Complete |
-| SCEN-02 | Phase 1, Phase 8 | Pending |
+| SCEN-02 | Phase 1, Phase 8 | Complete |
 | SCEN-03 | Phase 1 | Complete |
 | EXEC-01 | Phase 4 | Complete |
 | EXEC-02 | Phase 4 | Complete |
@@ -112,7 +112,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ADPT-01 | Phase 2 | Complete |
 | ADPT-02 | Phase 2 | Complete |
 | ADPT-03 | Phase 2 | Complete |
-| EVAL-01 | Phase 3, Phase 8 | Pending |
+| EVAL-01 | Phase 3, Phase 8 | Complete |
 | EVAL-02 | Phase 3 | Complete |
 | EVAL-03 | Phase 3 | Complete |
 | EVAL-04 | Phase 3 | Complete |
@@ -121,7 +121,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EVAL-07 | Phase 3 | Complete |
 | EVAL-08 | Phase 4 | Complete |
 | JUDG-01 | Phase 5, Phase 7, Phase 8 | Complete |
-| JUDG-02 | Phase 5, Phase 8 | Pending |
+| JUDG-02 | Phase 5, Phase 8 | Complete |
 | RECD-01 | Phase 6, Phase 7 | Complete |
 | RECD-02 | Phase 6, Phase 7 | Complete |
 | RECD-03 | Phase 6, Phase 7 | Complete |
@@ -129,7 +129,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CLI-02 | Phase 4 | Complete |
 | CLI-03 | Phase 4 | Complete |
 | CLI-04 | Phase 6, Phase 7 | Complete |
-| CLI-05 | Phase 1, Phase 8 | Pending |
+| CLI-05 | Phase 1, Phase 8 | Complete |
 | CLI-06 | Phase 4 | Complete |
 
 **Coverage:**
