@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** When you change your agent, Salvo tells you whether it still works -- across the full multi-step trajectory.
-**Current focus:** All Phases Complete
+**Current focus:** Phase 7 - Wire Trace Pipeline
 
 ## Current Position
 
-Phase: 6 of 6 (Record and Replay)
-Plan: 2 of 2 in current phase (06-02 complete)
-Status: All Phases Complete
-Last activity: 2026-02-19 -- Completed 06-02-PLAN.md
+Phase: 7 of 8 (Wire Trace Pipeline)
+Plan: 1 of 1 in current phase (07-01 complete)
+Status: Phase 7 Complete
+Last activity: 2026-02-19 -- Completed 07-01-PLAN.md
 
-Progress: [################] 100%
+Progress: [##############--] 87%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 15
-- Average duration: 4.5min
-- Total execution time: 1.1 hours
+- Total plans completed: 16
+- Average duration: 4.4min
+- Total execution time: 1.2 hours
 
 **By Phase:**
 
@@ -33,9 +33,10 @@ Progress: [################] 100%
 | 04-n-trial-runner-and-cli | 3/3 | 13min | 4.3min |
 | 05-llm-judge-evaluation | 2/2 | 10min | 5.0min |
 | 06-record-and-replay | 2/2 | 9min | 4.5min |
+| 07-wire-trace-pipeline | 1/1 | 4min | 4.0min |
 
 **Recent Trend:**
-- Last 5 plans: 04-03 (2min), 05-01 (5min), 05-02 (5min), 06-01 (4min), 06-02 (5min)
+- Last 5 plans: 05-01 (5min), 05-02 (5min), 06-01 (4min), 06-02 (5min), 07-01 (4min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -46,6 +47,7 @@ Progress: [################] 100%
 | Phase 05 P02 | 5min | 2 tasks | 9 files |
 | Phase 06 P01 | 4min | 2 tasks | 9 files |
 | Phase 06 P02 | 5min | 2 tasks | 9 files |
+| Phase 07 P01 | 4min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -118,6 +120,11 @@ Recent decisions affecting current work:
 - [06-02]: metadata_only traces filter out content-dependent assertion types (jmespath, judge, custom) during reeval
 - [06-02]: Replay shows (recorded) suffix on latency and cost values to distinguish from live runs
 - [06-02]: Reeval exit code mirrors run: 0 on pass, 1 on fail
+- [07-01]: trace_id generated as first line of _execute_single_trial, before try/except, for availability in both paths
+- [07-01]: Partial traces with finish_reason="error" persisted for failed trials
+- [07-01]: reeval_cmd strict by default on metadata_only with content-dependent assertions; --allow-partial-reeval opts in
+- [07-01]: Scenario drift detection only when --scenario flag is provided (original snapshot hashes match by definition)
+- [07-01]: replay_cmd exits 1 on missing run_id without --allow-partial (was exit 0)
 
 ### Pending Todos
 
@@ -132,5 +139,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 06-02-PLAN.md -- All phases complete
-Resume file: .planning/phases/06-record-and-replay/
+Stopped at: Completed 07-01-PLAN.md
+Resume file: .planning/phases/07-wire-trace-pipeline/

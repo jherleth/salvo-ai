@@ -120,15 +120,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EVAL-06 | Phase 3 | Complete |
 | EVAL-07 | Phase 3 | Complete |
 | EVAL-08 | Phase 4 | Complete |
-| JUDG-01 | Phase 5, Phase 7, Phase 8 | Pending |
+| JUDG-01 | Phase 5, Phase 7, Phase 8 | Complete |
 | JUDG-02 | Phase 5, Phase 8 | Pending |
-| RECD-01 | Phase 6, Phase 7 | Pending |
-| RECD-02 | Phase 6, Phase 7 | Pending |
-| RECD-03 | Phase 6, Phase 7 | Pending |
+| RECD-01 | Phase 6, Phase 7 | Complete |
+| RECD-02 | Phase 6, Phase 7 | Complete |
+| RECD-03 | Phase 6, Phase 7 | Complete |
 | CLI-01 | Phase 1 | Complete |
 | CLI-02 | Phase 4 | Complete |
 | CLI-03 | Phase 4 | Complete |
-| CLI-04 | Phase 6, Phase 7 | Pending |
+| CLI-04 | Phase 6, Phase 7 | Complete |
 | CLI-05 | Phase 1, Phase 8 | Pending |
 | CLI-06 | Phase 4 | Complete |
 
