@@ -45,15 +45,15 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Record/Replay
 
 - [x] **RECD-01**: User can record full agent traces (redacted) during runs
-- [ ] **RECD-02**: User can replay recorded runs without making API calls
-- [ ] **RECD-03**: User can re-evaluate recorded runs with updated assertions
+- [x] **RECD-02**: User can replay recorded runs without making API calls
+- [x] **RECD-03**: User can re-evaluate recorded runs with updated assertions
 
 ### CLI & Storage
 
 - [ ] **CLI-01**: `salvo init` scaffolds a new project with example scenario
 - [x] **CLI-02**: `salvo run` executes scenarios with rich terminal output (tables, colors, pass rates)
 - [x] **CLI-03**: `salvo report` shows historical run summaries with failure filtering
-- [ ] **CLI-04**: `salvo replay` replays a recorded run with optional re-evaluation
+- [x] **CLI-04**: `salvo replay` replays a recorded run with optional re-evaluation
 - [ ] **CLI-05**: All run data stored as JSON files in `.salvo/` directory
 - [x] **CLI-06**: CLI exits with non-zero code on failure for CI/CD integration
 
@@ -123,12 +123,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | JUDG-01 | Phase 5 | Complete |
 | JUDG-02 | Phase 5 | Complete |
 | RECD-01 | Phase 6 | Complete |
-| RECD-02 | Phase 6 | Pending |
-| RECD-03 | Phase 6 | Pending |
+| RECD-02 | Phase 6 | Complete |
+| RECD-03 | Phase 6 | Complete |
 | CLI-01 | Phase 1 | Pending |
 | CLI-02 | Phase 4 | Complete |
 | CLI-03 | Phase 4 | Complete |
-| CLI-04 | Phase 6 | Pending |
+| CLI-04 | Phase 6 | Complete |
 | CLI-05 | Phase 1 | Pending |
 | CLI-06 | Phase 4 | Complete |
 

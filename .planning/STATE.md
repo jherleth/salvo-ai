@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** When you change your agent, Salvo tells you whether it still works -- across the full multi-step trajectory.
-**Current focus:** Phase 6 In Progress -- Record and Replay
+**Current focus:** All Phases Complete
 
 ## Current Position
 
 Phase: 6 of 6 (Record and Replay)
-Plan: 1 of 2 in current phase (06-01 complete)
-Status: Phase 6 In Progress
-Last activity: 2026-02-19 -- Completed 06-01-PLAN.md
+Plan: 2 of 2 in current phase (06-02 complete)
+Status: All Phases Complete
+Last activity: 2026-02-19 -- Completed 06-02-PLAN.md
 
-Progress: [##############] 96%
+Progress: [################] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14
-- Average duration: 4.4min
-- Total execution time: 1.0 hours
+- Total plans completed: 15
+- Average duration: 4.5min
+- Total execution time: 1.1 hours
 
 **By Phase:**
 
@@ -32,10 +32,10 @@ Progress: [##############] 96%
 | 03-assertion-engine-and-scoring | 2/2 | 10min | 5.0min |
 | 04-n-trial-runner-and-cli | 3/3 | 13min | 4.3min |
 | 05-llm-judge-evaluation | 2/2 | 10min | 5.0min |
-| 06-record-and-replay | 1/2 | 4min | 4.0min |
+| 06-record-and-replay | 2/2 | 9min | 4.5min |
 
 **Recent Trend:**
-- Last 5 plans: 04-03 (2min), 05-01 (5min), 05-02 (5min), 06-01 (4min)
+- Last 5 plans: 04-03 (2min), 05-01 (5min), 05-02 (5min), 06-01 (4min), 06-02 (5min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -45,6 +45,7 @@ Progress: [##############] 96%
 | Phase 05 P01 | 5min | 2 tasks | 14 files |
 | Phase 05 P02 | 5min | 2 tasks | 9 files |
 | Phase 06 P01 | 4min | 2 tasks | 9 files |
+| Phase 06 P02 | 5min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -113,6 +114,10 @@ Recent decisions affecting current work:
 - [06-01]: metadata_only strips content to [CONTENT_EXCLUDED] while preserving roles, tool names, turn counts, usage
 - [06-01]: Each trial trace is individually recorded as {trace_id}.recorded.json (not one file per suite)
 - [06-01]: Recording happens after normal suite persistence (step 12b) to avoid disrupting existing flow
+- [06-02]: RevalResult stored in .salvo/revals/ directory to avoid contaminating list_runs() which globs .salvo/runs/
+- [06-02]: metadata_only traces filter out content-dependent assertion types (jmespath, judge, custom) during reeval
+- [06-02]: Replay shows (recorded) suffix on latency and cost values to distinguish from live runs
+- [06-02]: Reeval exit code mirrors run: 0 on pass, 1 on fail
 
 ### Pending Todos
 
@@ -127,5 +132,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 06-01-PLAN.md
+Stopped at: Completed 06-02-PLAN.md -- All phases complete
 Resume file: .planning/phases/06-record-and-replay/
