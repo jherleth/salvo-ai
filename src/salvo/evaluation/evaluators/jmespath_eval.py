@@ -95,6 +95,9 @@ def compare(actual: Any, operator: str, expected: Any) -> bool:
         # lte
         return a <= e
 
+    if operator == "exists":
+        return True  # actual is not None (already checked above)
+
     if operator == "contains":
         if isinstance(actual, str):
             return str(expected) in actual
@@ -118,7 +121,7 @@ class JMESPathEvaluator(BaseEvaluator):
         """Query trace data with JMESPath and compare result."""
         expression = assertion["expression"]
         operator = assertion["operator"]
-        expected = assertion["value"]
+        expected = assertion.get("value")
         weight = assertion.get("weight", 1.0)
         required = assertion.get("required", False)
 
