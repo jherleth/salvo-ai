@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from salvo.evaluation.evaluators.base import BaseEvaluator
 from salvo.evaluation.evaluators.cost_limit import CostLimitEvaluator
 from salvo.evaluation.evaluators.jmespath_eval import JMESPathEvaluator
+from salvo.evaluation.evaluators.judge import JudgeEvaluator
 from salvo.evaluation.evaluators.latency_limit import LatencyLimitEvaluator
 from salvo.evaluation.evaluators.tool_sequence import ToolSequenceEvaluator
 
@@ -15,6 +16,7 @@ EVALUATOR_REGISTRY: dict[str, type[BaseEvaluator]] = {
     "tool_sequence": ToolSequenceEvaluator,
     "cost_limit": CostLimitEvaluator,
     "latency_limit": LatencyLimitEvaluator,
+    "judge": JudgeEvaluator,
 }
 
 
