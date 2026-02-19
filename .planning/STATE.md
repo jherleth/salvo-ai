@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** When you change your agent, Salvo tells you whether it still works -- across the full multi-step trajectory.
-**Current focus:** Phase 4 Complete -- N-Trial Runner and CLI
+**Current focus:** Phase 5 In Progress -- LLM Judge Evaluation
 
 ## Current Position
 
-Phase: 4 of 6 (N-Trial Runner and CLI)
-Plan: 3 of 3 in current phase (04-03 complete)
-Status: Phase 4 Complete
-Last activity: 2026-02-18 -- Completed 04-03-PLAN.md
+Phase: 5 of 6 (LLM Judge Evaluation)
+Plan: 1 of 2 in current phase (05-01 complete)
+Status: Phase 5 In Progress
+Last activity: 2026-02-19 -- Completed 05-01-PLAN.md
 
-Progress: [##########] 79%
+Progress: [###########-] 86%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
-- Average duration: 4.2min
-- Total execution time: 0.77 hours
+- Total plans completed: 12
+- Average duration: 4.3min
+- Total execution time: 0.85 hours
 
 **By Phase:**
 
@@ -31,15 +31,17 @@ Progress: [##########] 79%
 | 02-adapter-layer-and-single-run-execution | 3/3 | 11min | 3.7min |
 | 03-assertion-engine-and-scoring | 2/2 | 10min | 5.0min |
 | 04-n-trial-runner-and-cli | 3/3 | 13min | 4.3min |
+| 05-llm-judge-evaluation | 1/2 | 5min | 5.0min |
 
 **Recent Trend:**
-- Last 5 plans: 03-02 (4min), 04-01 (5min), 04-02 (6min), 04-03 (2min)
+- Last 5 plans: 04-01 (5min), 04-02 (6min), 04-03 (2min), 05-01 (5min)
 - Trend: stable
 
 *Updated after each plan completion*
 | Phase 04 P01 | 5min | 2 tasks | 8 files |
 | Phase 04 P02 | 6min | 2 tasks | 6 files |
 | Phase 04 P03 | 2min | 1 tasks | 3 files |
+| Phase 05 P01 | 5min | 2 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -95,6 +97,10 @@ Recent decisions affecting current work:
 - [04-03]: _find_project_root walks up from cwd (not scenario file) since report has no scenario argument
 - [04-03]: History mode loads runs individually with skip-on-error for corrupted/incompatible entries
 - [04-03]: Verdict styling duplicated from output.py to keep report_cmd and output.py as independent modules
+- [05-01]: judge_model field name avoids Pydantic model_* namespace collision
+- [05-01]: Judge subpackage (evaluation/judge/) isolates all judge modules from existing evaluators
+- [05-01]: format_tool_choice detects provider via string contains for flexible naming
+- [05-01]: Threshold field added to Assertion model for per-assertion judge threshold override
 
 ### Pending Todos
 
@@ -108,6 +114,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-18
-Stopped at: Completed 04-03-PLAN.md (Phase 4 complete)
-Resume file: .planning/phases/05-llm-as-judge/ (next phase)
+Last session: 2026-02-19
+Stopped at: Completed 05-01-PLAN.md
+Resume file: .planning/phases/05-llm-judge-evaluation/05-02-PLAN.md

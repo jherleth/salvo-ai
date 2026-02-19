@@ -39,8 +39,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### LLM Judge
 
-- [ ] **JUDG-01**: User can define rubric-based LLM judge assertions
-- [ ] **JUDG-02**: LLM judge runs k times (default 3) with majority-vote pass/fail
+- [x] **JUDG-01**: User can define rubric-based LLM judge assertions
+- [x] **JUDG-02**: LLM judge runs k times (default 3) with majority-vote pass/fail
 
 ### Record/Replay
 
@@ -120,8 +120,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EVAL-06 | Phase 3 | Complete |
 | EVAL-07 | Phase 3 | Complete |
 | EVAL-08 | Phase 4 | Complete |
-| JUDG-01 | Phase 5 | Pending |
-| JUDG-02 | Phase 5 | Pending |
+| JUDG-01 | Phase 5 | Complete |
+| JUDG-02 | Phase 5 | Complete |
 | RECD-01 | Phase 6 | Pending |
 | RECD-02 | Phase 6 | Pending |
 | RECD-03 | Phase 6 | Pending |
