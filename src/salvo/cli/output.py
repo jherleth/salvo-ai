@@ -93,6 +93,21 @@ def render_headline(suite: TrialSuiteResult, console: Console) -> None:
         f"(threshold={suite.threshold:.2f})",
     )
 
+    # Judge row (if judge assertions detected)
+    judge_info = None
+    for trial in suite.trials:
+        for er in trial.eval_results:
+            if er.assertion_type == "judge" and er.metadata:
+                judge_info = er.metadata
+                break
+        if judge_info:
+            break
+
+    if judge_info:
+        jm = judge_info.get("judge_model", "unknown")
+        jk = judge_info.get("judge_k", "?")
+        table.add_row("Judge", f"model={jm} k={jk}")
+
     # Failures row (only if any)
     if suite.trials_hard_fail > 0 or suite.trials_failed > 0:
         table.add_row(
@@ -109,10 +124,18 @@ def render_headline(suite: TrialSuiteResult, console: Console) -> None:
 
     # Cost row (only if available)
     if suite.cost_total is not None and suite.cost_avg_per_trial is not None:
-        table.add_row(
-            "Cost",
-            f"total=${suite.cost_total:.4f} avg=${suite.cost_avg_per_trial:.4f}/trial",
-        )
+        agent_cost = suite.cost_total
+        judge_cost = suite.judge_cost_total or 0.0
+        combined = agent_cost + judge_cost
+        if judge_cost > 0:
+            cost_str = (
+                f"total=${combined:.4f} "
+                f"(agent=${agent_cost:.4f} + judge=${judge_cost:.4f}) "
+                f"avg=${suite.cost_avg_per_trial:.4f}/trial"
+            )
+        else:
+            cost_str = f"total=${agent_cost:.4f} avg=${suite.cost_avg_per_trial:.4f}/trial"
+        table.add_row("Cost", cost_str)
 
     # Retries row (only if any)
     if suite.total_retries > 0:
@@ -195,14 +218,52 @@ def render_details(suite: TrialSuiteResult, console: Console) -> None:
     if suite.cost_total is not None:
         costs = [t.cost_usd for t in suite.trials if t.cost_usd is not None]
         if costs:
-            console.print(
-                f"[bold]Cost:[/bold] total=${suite.cost_total:.4f} "
+            cost_str = (
+                f"total=${suite.cost_total:.4f} "
                 f"min=${min(costs):.4f} max=${max(costs):.4f} "
                 f"avg=${suite.cost_avg_per_trial:.4f}/trial"
             )
+            if suite.judge_cost_total is not None and suite.judge_cost_total > 0:
+                agent_cost = suite.cost_total
+                cost_str += (
+                    f" (agent=${agent_cost:.4f}"
+                    f" + judge=${suite.judge_cost_total:.4f})"
+                )
+            console.print(f"[bold]Cost:[/bold] {cost_str}")
             console.print()
 
-    # 5. Sample failures
+    # 5. Judge criteria breakdown
+    judge_criteria: list[dict] = []
+    for trial in suite.trials:
+        for er in trial.eval_results:
+            if er.assertion_type == "judge" and er.metadata and "per_criterion" in er.metadata:
+                judge_criteria = er.metadata["per_criterion"]
+                break
+        if judge_criteria:
+            break
+
+    if judge_criteria:
+        console.print("[bold]Judge Criteria[/bold]")
+        for pc in judge_criteria:
+            name = pc.get("name", "unknown")
+            median = pc.get("median_score", 0.0)
+            weight = pc.get("weight", 1.0)
+            all_scores = pc.get("all_scores", [])
+            scores_str = ", ".join(f"{s:.2f}" for s in all_scores)
+            # Color-code median: green >= 0.7, yellow >= 0.4, red < 0.4
+            if median >= 0.7:
+                color_style = "green"
+            elif median >= 0.4:
+                color_style = "yellow"
+            else:
+                color_style = "red"
+            console.print(
+                f"  [{color_style}]{name}[/{color_style}]: median={median:.2f} "
+                f"scores=[{scores_str}] weight={weight:.1f}"
+            )
+        console.print()
+
+    # 6. Sample failures
     if suite.assertion_failures:
         top_failure = suite.assertion_failures[0]
         samples = top_failure.get("sample_details", [])
