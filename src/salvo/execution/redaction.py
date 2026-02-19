@@ -19,6 +19,12 @@ REDACTION_PATTERNS: list[str] = [
     r"(?i)bearer\s+[a-zA-Z0-9._-]+",  # Bearer tokens (before general auth pattern)
     r"sk-[a-zA-Z0-9]{20,}",  # OpenAI API key pattern
     r"(?i)(api[_-]?key|secret|password|token|authorization)\s*[:=]\s*\S+",
+    r"(?i)cookie:\s*\S+",  # Cookie headers
+    r"(?i)set-cookie:\s*\S+",  # Set-Cookie headers
+    r"(?i)x-api-key:\s*\S+",  # X-API-Key headers
+    r"sk-ant-[a-zA-Z0-9-]{20,}",  # Anthropic API key values
+    r"ghp_[a-zA-Z0-9]{36}",  # GitHub PATs
+    r"gho_[a-zA-Z0-9]{36}",  # GitHub OAuth tokens
 ]
 
 # Compiled patterns for performance (compiled once at module load).

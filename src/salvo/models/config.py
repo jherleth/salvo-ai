@@ -6,7 +6,22 @@ project-level settings like adapter, model, and paths.
 
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, Field
+
+
+class RecordingConfig(BaseModel):
+    """Configuration for trace recording behavior.
+
+    Controls recording mode (full vs metadata_only) and custom
+    redaction patterns that extend the built-in set.
+    """
+
+    model_config = {"extra": "forbid"}
+
+    mode: Literal["full", "metadata_only"] = "full"
+    custom_redaction_patterns: list[str] = Field(default_factory=list)
 
 
 class JudgeConfig(BaseModel):
@@ -36,3 +51,4 @@ class ProjectConfig(BaseModel):
     ci_mode: bool = False
     storage_dir: str = ".salvo"
     judge: JudgeConfig = Field(default_factory=JudgeConfig)
+    recording: RecordingConfig = Field(default_factory=RecordingConfig)
