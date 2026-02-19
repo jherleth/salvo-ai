@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** When you change your agent, Salvo tells you whether it still works -- across the full multi-step trajectory.
-**Current focus:** Phase 5 In Progress -- LLM Judge Evaluation
+**Current focus:** Phase 5 Complete -- LLM Judge Evaluation
 
 ## Current Position
 
 Phase: 5 of 6 (LLM Judge Evaluation)
-Plan: 1 of 2 in current phase (05-01 complete)
-Status: Phase 5 In Progress
-Last activity: 2026-02-19 -- Completed 05-01-PLAN.md
+Plan: 2 of 2 in current phase (05-02 complete)
+Status: Phase 5 Complete
+Last activity: 2026-02-19 -- Completed 05-02-PLAN.md
 
-Progress: [###########-] 86%
+Progress: [############] 93%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
-- Average duration: 4.3min
-- Total execution time: 0.85 hours
+- Total plans completed: 13
+- Average duration: 4.4min
+- Total execution time: 0.93 hours
 
 **By Phase:**
 
@@ -31,10 +31,10 @@ Progress: [###########-] 86%
 | 02-adapter-layer-and-single-run-execution | 3/3 | 11min | 3.7min |
 | 03-assertion-engine-and-scoring | 2/2 | 10min | 5.0min |
 | 04-n-trial-runner-and-cli | 3/3 | 13min | 4.3min |
-| 05-llm-judge-evaluation | 1/2 | 5min | 5.0min |
+| 05-llm-judge-evaluation | 2/2 | 10min | 5.0min |
 
 **Recent Trend:**
-- Last 5 plans: 04-01 (5min), 04-02 (6min), 04-03 (2min), 05-01 (5min)
+- Last 5 plans: 04-02 (6min), 04-03 (2min), 05-01 (5min), 05-02 (5min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -42,6 +42,7 @@ Progress: [###########-] 86%
 | Phase 04 P02 | 6min | 2 tasks | 6 files |
 | Phase 04 P03 | 2min | 1 tasks | 3 files |
 | Phase 05 P01 | 5min | 2 tasks | 14 files |
+| Phase 05 P02 | 5min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -101,6 +102,10 @@ Recent decisions affecting current work:
 - [05-01]: Judge subpackage (evaluation/judge/) isolates all judge modules from existing evaluators
 - [05-01]: format_tool_choice detects provider via string contains for flexible naming
 - [05-01]: Threshold field added to Assertion model for per-assertion judge threshold override
+- [05-02]: evaluate_async default delegates to sync evaluate() -- existing evaluators unchanged
+- [05-02]: EvalResult.metadata stores structured judge data alongside human-readable details string
+- [05-02]: Judge cost tracked separately: cost_total is agent-only, judge_cost_total is additional
+- [05-02]: CLI combined total = agent + judge displayed when judge assertions present
 
 ### Pending Todos
 
@@ -115,5 +120,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 05-01-PLAN.md
-Resume file: .planning/phases/05-llm-judge-evaluation/05-02-PLAN.md
+Stopped at: Completed 05-02-PLAN.md (Phase 5 complete)
+Resume file: .planning/phases/06-record-replay-and-regression/
