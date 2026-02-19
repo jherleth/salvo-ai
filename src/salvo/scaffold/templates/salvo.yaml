@@ -7,3 +7,14 @@ default_model: gpt-4o
 
 # Directory containing scenario files
 scenarios_dir: scenarios
+
+# Storage directory for run data (default: .salvo)
+# storage_dir: .salvo
+
+# Judge defaults (per-assertion settings override these)
+# judge:
+#   adapter: openai
+#   model: gpt-4o-mini
+#   k: 3
+#   temperature: 0.0
+#   default_threshold: 0.8

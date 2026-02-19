@@ -32,8 +32,9 @@ class RunStore:
     UUID7 IDs sort chronologically by default.
     """
 
-    def __init__(self, project_root: Path) -> None:
-        self.salvo_dir = project_root / ".salvo"
+    def __init__(self, project_root: Path, storage_dir: str | None = None) -> None:
+        effective_dir = storage_dir or ".salvo"
+        self.salvo_dir = project_root / effective_dir
         self.runs_dir = self.salvo_dir / "runs"
         self.traces_dir = self.salvo_dir / "traces"
         self.revals_dir = self.salvo_dir / "revals"

@@ -25,10 +25,8 @@ if TYPE_CHECKING:
     from salvo.storage.json_store import RunStore
 
 
-def load_project_config(project_root: Path) -> "salvo.models.config.ProjectConfig":
-    """Load ProjectConfig from salvo.yaml in the project root.
-
-    If salvo.yaml does not exist, returns a default ProjectConfig.
+def load_project_config(project_root: "Path") -> "salvo.models.config.ProjectConfig":
+    """Load ProjectConfig -- re-exported from models.config for backward compat.
 
     Args:
         project_root: Path to the project root directory.
@@ -36,19 +34,9 @@ def load_project_config(project_root: Path) -> "salvo.models.config.ProjectConfi
     Returns:
         Validated ProjectConfig instance.
     """
-    from salvo.models.config import ProjectConfig
+    from salvo.models.config import load_project_config as _load
 
-    config_path = project_root / "salvo.yaml"
-    if not config_path.exists():
-        return ProjectConfig()
-
-    import yaml
-
-    raw = yaml.safe_load(config_path.read_text(encoding="utf-8"))
-    if raw is None:
-        return ProjectConfig()
-
-    return ProjectConfig.model_validate(raw)
+    return _load(project_root)
 
 
 class TraceRecorder:
