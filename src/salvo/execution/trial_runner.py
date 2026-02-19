@@ -13,7 +13,10 @@ import tempfile
 import time
 import uuid
 from collections.abc import Awaitable, Callable
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from salvo.storage.json_store import RunStore
 
 from salvo.adapters.base import AdapterConfig, BaseAdapter
 from salvo.evaluation.aggregation import (
@@ -46,6 +49,7 @@ class TrialRunner:
         max_retries: int = 3,
         early_stop: bool = False,
         threshold: float = 1.0,
+        store: RunStore | None = None,
     ) -> None:
         self._adapter_factory = adapter_factory
         self._scenario = scenario
@@ -55,6 +59,8 @@ class TrialRunner:
         self._max_retries = max_retries
         self._early_stop = early_stop
         self._threshold = threshold
+        self._store = store
+        self._manifest_lock: asyncio.Lock | None = None
 
     async def run_all(
         self,
@@ -104,6 +110,7 @@ class TrialRunner:
         stop_event = asyncio.Event()
         results: list[TrialResult | None] = [None] * self._n_trials
         lock = asyncio.Lock()
+        self._manifest_lock = asyncio.Lock() if self._store is not None else None
 
         async def run_one(trial_num: int) -> None:
             if stop_event.is_set():
@@ -138,7 +145,9 @@ class TrialRunner:
 
         Creates a unique temporary directory and fresh adapter per trial.
         Wraps execution in retry_with_backoff for transient error handling.
+        Generates trace_id upfront so it is available in both success and error paths.
         """
+        trace_id = str(uuid.uuid7())
         start_time = time.perf_counter()
 
         with tempfile.TemporaryDirectory(prefix=f"salvo_trial_{trial_num}_") as tmpdir:
@@ -155,6 +164,10 @@ class TrialRunner:
                     base_delay=1.0,
                     max_delay=30.0,
                 )
+
+                # Persist trace immediately if store is available
+                if self._store is not None:
+                    self._store.save_trace(trace_id, trace)
 
                 # Normalize assertions for evaluation
                 raw_assertions = [
@@ -194,11 +207,38 @@ class TrialRunner:
                     cost_usd=trace.cost_usd,
                     retries_used=retries_used,
                     transient_error_types=error_types,
-                    trace_id=None,  # Assigned by RunStore later
+                    trace_id=trace_id,
                 )
 
             except Exception as exc:
                 elapsed = time.perf_counter() - start_time
+
+                # Persist partial trace for failed trials
+                if self._store is not None:
+                    from salvo.execution.trace import RunTrace, TraceMessage
+
+                    partial_trace = RunTrace(
+                        messages=[
+                            TraceMessage(role="system", content=self._scenario.system_prompt or ""),
+                            TraceMessage(role="user", content=self._scenario.prompt),
+                        ],
+                        tool_calls_made=[],
+                        turn_count=0,
+                        input_tokens=0,
+                        output_tokens=0,
+                        total_tokens=0,
+                        latency_seconds=elapsed,
+                        final_content=None,
+                        finish_reason="error",
+                        model=self._config.model,
+                        provider="unknown",
+                        timestamp=__import__("datetime").datetime.now(
+                            __import__("datetime").timezone.utc
+                        ),
+                        scenario_hash="",
+                    )
+                    self._store.save_trace(trace_id, partial_trace)
+
                 return TrialResult(
                     trial_number=trial_num,
                     status=TrialStatus.infra_error,
@@ -208,6 +248,7 @@ class TrialRunner:
                     error_message=str(exc),
                     retries_used=self._max_retries,
                     transient_error_types=[type(exc).__name__],
+                    trace_id=trace_id,
                 )
 
     def _should_stop_early(self, completed: list[TrialResult]) -> bool:
@@ -276,6 +317,20 @@ class TrialRunner:
                 early_stop_reason = "Threshold mathematically unreachable"
 
         run_id = str(uuid.uuid7())
+
+        # Update trace manifest for each trial
+        if self._store is not None:
+            scenario_name = self._scenario.description or self._scenario.prompt[:50]
+            for trial in results:
+                if trial.trace_id:
+                    self._store.update_trace_manifest(
+                        run_id=run_id,
+                        trace_id=trial.trace_id,
+                        trial_index=trial.trial_number - 1,
+                        status=trial.status.value,
+                        error=trial.error_message if trial.status == TrialStatus.infra_error else None,
+                        scenario_name=scenario_name,
+                    )
 
         return TrialSuiteResult(
             run_id=run_id,

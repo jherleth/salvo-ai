@@ -387,6 +387,127 @@ class RunStore:
         tmp_file.write_text(content, encoding="utf-8")
         tmp_file.rename(result_file)
 
+    # -- Trace manifest methods --
+
+    def load_trace_manifest(self) -> dict:
+        """Load the trace manifest from .salvo/traces/manifest.json.
+
+        Returns:
+            Dict with schema_version and runs mapping. Returns default
+            structure if file does not exist.
+        """
+        manifest_path = self.traces_dir / "manifest.json"
+        if manifest_path.exists():
+            content = manifest_path.read_text(encoding="utf-8")
+            return json.loads(content)
+        return {"schema_version": 1, "runs": {}}
+
+    def update_trace_manifest(
+        self,
+        run_id: str,
+        trace_id: str,
+        trial_index: int,
+        status: str,
+        error: str | None = None,
+        scenario_name: str = "",
+    ) -> None:
+        """Update the trace manifest with a new trace_id entry for a run.
+
+        Creates the run entry if absent. Appends trace info to the run's
+        trace_ids list. Uses atomic write (write .tmp, rename).
+
+        Args:
+            run_id: The run ID this trace belongs to.
+            trace_id: The trace ID to register.
+            trial_index: Zero-based trial index.
+            status: Trial status value string.
+            error: Error message if infra_error, else None.
+            scenario_name: Scenario name for the run entry.
+        """
+        from datetime import datetime, timezone
+
+        self.traces_dir.mkdir(parents=True, exist_ok=True)
+        manifest = self.load_trace_manifest()
+        runs = manifest.setdefault("runs", {})
+
+        if run_id not in runs:
+            runs[run_id] = {
+                "trace_ids": [],
+                "recorded": False,
+                "scenario_name": scenario_name,
+                "created_at": datetime.now(timezone.utc).isoformat(),
+            }
+
+        entry: dict[str, str | int] = {
+            "trace_id": trace_id,
+            "trial_index": trial_index,
+            "status": status,
+        }
+        if error is not None:
+            entry["error"] = error
+
+        runs[run_id]["trace_ids"].append(entry)
+
+        # Atomic write
+        manifest_path = self.traces_dir / "manifest.json"
+        tmp_path = self.traces_dir / "manifest.json.tmp"
+        content = json.dumps(manifest, indent=2, ensure_ascii=False)
+        tmp_path.write_text(content, encoding="utf-8")
+        tmp_path.rename(manifest_path)
+
+    def mark_run_recorded(self, run_id: str) -> None:
+        """Mark a run as recorded in the trace manifest.
+
+        Args:
+            run_id: The run ID to mark as recorded.
+        """
+        manifest = self.load_trace_manifest()
+        runs = manifest.get("runs", {})
+        if run_id in runs:
+            runs[run_id]["recorded"] = True
+
+            # Atomic write
+            manifest_path = self.traces_dir / "manifest.json"
+            tmp_path = self.traces_dir / "manifest.json.tmp"
+            content = json.dumps(manifest, indent=2, ensure_ascii=False)
+            tmp_path.write_text(content, encoding="utf-8")
+            tmp_path.rename(manifest_path)
+
+    def get_trace_ids_for_run(self, run_id: str) -> list[str]:
+        """Get all trace IDs for a given run.
+
+        Args:
+            run_id: The run ID to look up.
+
+        Returns:
+            List of trace_id strings, or empty list if run not found.
+        """
+        manifest = self.load_trace_manifest()
+        runs = manifest.get("runs", {})
+        run_entry = runs.get(run_id, {})
+        return [
+            entry["trace_id"]
+            for entry in run_entry.get("trace_ids", [])
+            if isinstance(entry, dict) and "trace_id" in entry
+        ]
+
+    def get_latest_recorded_run_id(self) -> str | None:
+        """Get the most recent recorded run ID from the manifest.
+
+        UUID7 IDs sort chronologically, so max() gives the latest.
+
+        Returns:
+            The latest recorded run_id, or None if no recorded runs exist.
+        """
+        manifest = self.load_trace_manifest()
+        runs = manifest.get("runs", {})
+        recorded_ids = [
+            rid for rid, data in runs.items() if data.get("recorded", False)
+        ]
+        if not recorded_ids:
+            return None
+        return max(recorded_ids)
+
     def _load_index(self) -> dict[str, list[str]]:
         """Load the scenario-to-runs index file.
 

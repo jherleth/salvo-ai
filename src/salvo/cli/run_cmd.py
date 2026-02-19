@@ -134,6 +134,10 @@ async def _run_async(
     # 6. Determine threshold
     effective_threshold = threshold_override if threshold_override is not None else scenario.threshold
 
+    # 6b. Create store early so it can be passed to TrialRunner for immediate trace persistence
+    project_root = _find_project_root(filepath)
+    store = RunStore(project_root)
+
     # 7. Create TrialRunner
     runner = TrialRunner(
         adapter_factory=adapter_factory,
@@ -144,6 +148,7 @@ async def _run_async(
         max_retries=3,
         early_stop=early_stop,
         threshold=effective_threshold,
+        store=store,
     )
 
     # 8. Output console (stdout for results, stderr for progress)
@@ -169,19 +174,10 @@ async def _run_async(
     suite = suite.model_copy(update={"scenario_file": str(filepath)})
 
     # 11. Persist suite result and update latest symlink
-    project_root = _find_project_root(filepath)
-    store = RunStore(project_root)
     store.save_suite_result(suite)
     store.update_latest_symlink(suite.run_id)
 
-    # 12. Save individual trial traces
-    for trial in suite.trials:
-        if trial.trace_id:
-            trace = store.load_trace(trial.trace_id)
-            if trace is not None:
-                store.save_trace(trial.trace_id, trace)
-
-    # 12b. Record traces if --record flag set
+    # 12. Record traces if --record flag set
     if record:
         from salvo.recording.recorder import TraceRecorder, load_project_config
 
@@ -193,6 +189,7 @@ async def _run_async(
             custom_patterns=proj_config.recording.custom_redaction_patterns or None,
         )
         recorder.record_suite(suite, scenario, str(filepath))
+        store.mark_run_recorded(suite.run_id)
 
     # 13. Output results
     if format_json:
@@ -209,6 +206,10 @@ async def _run_async(
         output_console.print(f"[dim]Run saved: {suite.run_id}[/dim]")
         if record:
             output_console.print(f"[dim]Trace recorded: {suite.run_id}[/dim]")
+            for trial in suite.trials:
+                output_console.print(
+                    f"[dim]  Trial {trial.trial_number}: trace_id={trial.trace_id}[/dim]"
+                )
 
     # 14. Determine exit code
     if allow_infra and verdict_value == "INFRA_ERROR":
