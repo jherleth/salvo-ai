@@ -50,13 +50,38 @@ def reeval(
         "-s",
         help="Path to updated scenario YAML (default: use original snapshot)",
     ),
+    allow_partial_reeval: bool = typer.Option(
+        False,
+        "--allow-partial-reeval",
+        help="Skip incompatible assertions on metadata_only traces instead of failing",
+    ),
+    strict_scenario: bool = typer.Option(
+        False,
+        "--strict-scenario",
+        help="Fail if scenario has changed since trace was recorded",
+    ),
 ) -> None:
     """Re-evaluate a recorded trace with original or updated assertions."""
-    asyncio.run(_reeval_async(run_id, scenario_path))
+    asyncio.run(
+        _reeval_async(
+            run_id,
+            scenario_path,
+            allow_partial_reeval=allow_partial_reeval,
+            strict_scenario=strict_scenario,
+        )
+    )
 
 
-async def _reeval_async(run_id: str, scenario_path: str | None) -> None:
+async def _reeval_async(
+    run_id: str,
+    scenario_path: str | None,
+    *,
+    allow_partial_reeval: bool = False,
+    strict_scenario: bool = False,
+) -> None:
     """Async implementation of the reeval command."""
+    import hashlib
+
     from salvo.evaluation.scorer import evaluate_trace_async
     from salvo.loader.validator import validate_scenario_file
     from salvo.models.scenario import Scenario
@@ -93,10 +118,36 @@ async def _reeval_async(run_id: str, scenario_path: str | None) -> None:
         scenario = Scenario.model_validate(recorded.scenario_snapshot)
         console.print("[dim]Using original scenario snapshot[/dim]")
 
+    # Scenario drift detection
+    if scenario_path is not None:
+        current_hash = hashlib.sha256(scenario.model_dump_json().encode()).hexdigest()
+        recorded_hash = recorded.metadata.scenario_hash
+
+        if current_hash != recorded_hash:
+            if strict_scenario:
+                console.print(
+                    "[bold red]Error:[/bold red] Scenario hash mismatch. "
+                    "The scenario has changed since the trace was recorded.\n"
+                    f"  Recorded: {recorded_hash[:12]}...\n"
+                    f"  Current:  {current_hash[:12]}...\n"
+                    "Remove --strict-scenario to proceed with warnings."
+                )
+                raise typer.Exit(code=1)
+            else:
+                console.print(
+                    f"[yellow]Warning: Scenario has changed since trace was recorded "
+                    f"(recorded={recorded_hash[:12]}..., current={current_hash[:12]}...)[/yellow]"
+                )
+
     # Check metadata_only mode
     metadata_only = recorded.metadata.recording_mode == "metadata_only"
     all_raw_assertions = [a.model_dump(exclude_none=True) for a in scenario.assertions]
     normalized_assertions = normalize_assertions(all_raw_assertions)
+
+    # Inject scenario reference for judge assertions (matching trial_runner.py pattern)
+    for a in normalized_assertions:
+        if a.get("type") == "judge":
+            a["_scenario"] = scenario
 
     assertions_skipped = 0
     if metadata_only:
@@ -116,6 +167,14 @@ async def _reeval_async(run_id: str, scenario_path: str | None) -> None:
             raise typer.Exit(code=1)
 
         if content_dependent:
+            if not allow_partial_reeval:
+                console.print(
+                    f"[bold red]Error:[/bold red] {len(content_dependent)} assertion(s) "
+                    "require message content unavailable in metadata_only mode. "
+                    "Use --allow-partial-reeval to skip them."
+                )
+                raise typer.Exit(code=1)
+
             assertions_skipped = len(content_dependent)
             console.print(
                 f"[yellow]Warning: {assertions_skipped} assertion(s) skipped "

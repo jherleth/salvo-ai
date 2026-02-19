@@ -227,8 +227,26 @@ def test_reeval_original_trace_id_set(tmp_path):
     assert reeval_data["original_trace_id"] == "test-run-001"
 
 
-def test_reeval_metadata_only_skips_content_assertions(tmp_path):
-    """Reeval with metadata_only trace skips content-dependent assertions."""
+def test_reeval_metadata_only_strict_by_default(tmp_path):
+    """Reeval with metadata_only trace fails by default on content-dependent assertions."""
+    trace_data = _make_recorded_trace(recording_mode="metadata_only")
+    # Add a jmespath assertion to snapshot (content-dependent)
+    trace_data["scenario_snapshot"]["assertions"] = [
+        {"type": "jmespath", "expression": "response.content", "operator": "contains", "value": "hello"},
+        {"type": "latency_limit", "max_seconds": 5.0},
+    ]
+    _write_recorded_trace(tmp_path, trace_data)
+
+    with patch("salvo.cli.reeval_cmd._find_project_root", return_value=tmp_path):
+        result = runner.invoke(app, ["reeval", "test-run-001"])
+
+    assert result.exit_code == 1
+    assert "require message content" in result.output
+    assert "--allow-partial-reeval" in result.output
+
+
+def test_reeval_metadata_only_skips_content_assertions_with_flag(tmp_path):
+    """Reeval with metadata_only trace skips content-dependent assertions when --allow-partial-reeval is set."""
     trace_data = _make_recorded_trace(recording_mode="metadata_only")
     # Add a jmespath assertion to snapshot (content-dependent)
     trace_data["scenario_snapshot"]["assertions"] = [
@@ -258,7 +276,7 @@ def test_reeval_metadata_only_skips_content_assertions(tmp_path):
             ),
         ),
     ):
-        result = runner.invoke(app, ["reeval", "test-run-001"])
+        result = runner.invoke(app, ["reeval", "test-run-001", "--allow-partial-reeval"])
 
     assert result.exit_code == 0
     assert "1 assertion(s) skipped" in result.output

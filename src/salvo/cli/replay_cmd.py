@@ -7,11 +7,13 @@ matching the live `salvo run` output, with a [REPLAY] banner and
 
 from __future__ import annotations
 
+import json
 from collections import Counter
 from pathlib import Path
 from typing import Optional
 
 import typer
+from pydantic import ValidationError
 from rich import box
 from rich.console import Console
 from rich.table import Table
@@ -38,6 +40,11 @@ def replay(
     run_id: Optional[str] = typer.Argument(
         None, help="Run ID to replay (default: latest recorded)"
     ),
+    allow_partial: bool = typer.Option(
+        False,
+        "--allow-partial",
+        help="Replay available traces even when some are missing",
+    ),
 ) -> None:
     """Replay a recorded trace without making API calls."""
     console = Console()
@@ -50,13 +57,42 @@ def replay(
     store = RunStore(project_root)
     replayer = TraceReplayer(store)
 
-    # Load trace
-    recorded = replayer.load(run_id)
+    # Load trace with error handling for corrupt files
+    try:
+        recorded = replayer.load(run_id)
+    except (json.JSONDecodeError, ValidationError) as exc:
+        if allow_partial:
+            console.print(
+                f"[yellow]Warning: Trace file for '{run_id}' is corrupt. "
+                f"Skipping.[/yellow]"
+            )
+            raise typer.Exit(code=0)
+        else:
+            console.print(
+                f"[bold red]Error:[/bold red] Corrupt trace file for '{run_id}'. "
+                "Use --allow-partial to skip corrupt traces."
+            )
+            raise typer.Exit(code=1)
+
     if recorded is None:
-        console.print(
-            "[dim]No recorded traces found. Run 'salvo run --record' first.[/dim]"
-        )
-        raise typer.Exit(code=0)
+        if run_id is not None:
+            if allow_partial:
+                console.print(
+                    f"[yellow]Warning: No recorded trace found for '{run_id}'. "
+                    f"Skipping.[/yellow]"
+                )
+                raise typer.Exit(code=0)
+            else:
+                console.print(
+                    f"[bold red]Error:[/bold red] No recorded trace found for '{run_id}'. "
+                    "Run 'salvo run --record' first."
+                )
+                raise typer.Exit(code=1)
+        else:
+            console.print(
+                "[dim]No recorded traces found. Run 'salvo run --record' first.[/dim]"
+            )
+            raise typer.Exit(code=0)
 
     # Check metadata_only
     metadata_only = replayer.is_metadata_only(recorded)
