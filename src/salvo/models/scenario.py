@@ -48,6 +48,13 @@ class Assertion(BaseModel):
     operator: str | None = None
     max_usd: float | None = None
     max_seconds: float | None = None
+    # Judge-specific optional fields
+    criteria: list[dict[str, Any]] | None = None
+    judge_model: str | None = None
+    k: int | None = None
+    include_system_prompt: bool = False
+    custom_prompt: str | None = None
+    threshold: float | None = None
 
 
 class Scenario(BaseModel):
