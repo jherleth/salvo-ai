@@ -107,10 +107,11 @@ Plans:
   1. User can record full agent traces (with sensitive data redacted) during runs, stored as JSON
   2. User can run `salvo replay` on a recorded run and see results without any API calls being made
   3. User can re-evaluate a recorded run with updated assertions and see new scores against the same trace
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 06-01: TBD
+- [ ] 06-01-PLAN.md -- Recording infrastructure: RecordedTrace models, extended redaction with custom patterns, metadata_only mode, RecordingConfig, --record flag on `salvo run`, RunStore trace persistence
+- [ ] 06-02-PLAN.md -- Replay and re-evaluation CLI: `salvo replay` with [REPLAY] banner and (recorded) timing, `salvo reeval` with updated assertions and linked results
 
 ## Progress
 

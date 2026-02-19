@@ -44,7 +44,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Record/Replay
 
-- [ ] **RECD-01**: User can record full agent traces (redacted) during runs
+- [x] **RECD-01**: User can record full agent traces (redacted) during runs
 - [ ] **RECD-02**: User can replay recorded runs without making API calls
 - [ ] **RECD-03**: User can re-evaluate recorded runs with updated assertions
 
@@ -122,7 +122,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EVAL-08 | Phase 4 | Complete |
 | JUDG-01 | Phase 5 | Complete |
 | JUDG-02 | Phase 5 | Complete |
-| RECD-01 | Phase 6 | Pending |
+| RECD-01 | Phase 6 | Complete |
 | RECD-02 | Phase 6 | Pending |
 | RECD-03 | Phase 6 | Pending |
 | CLI-01 | Phase 1 | Pending |
