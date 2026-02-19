@@ -1,7 +1,8 @@
-"""Pydantic models for recorded traces.
+"""Pydantic models for recorded traces and re-evaluation results.
 
 Defines the schema for recorded trace files that capture full agent
-execution traces with metadata for replay and re-evaluation.
+execution traces with metadata for replay and re-evaluation, plus
+RevalResult for re-evaluation output.
 """
 
 from __future__ import annotations
@@ -12,6 +13,7 @@ from typing import Any, Literal
 from pydantic import BaseModel
 
 from salvo.execution.trace import RunTrace
+from salvo.models.result import EvalResult
 
 # Current schema version for recorded trace files.
 CURRENT_TRACE_SCHEMA_VERSION = 1
@@ -50,6 +52,28 @@ class RecordedTrace(BaseModel):
     trace: RunTrace
     scenario_snapshot: dict[str, Any]
     original_trace_id: str | None = None
+
+
+class RevalResult(BaseModel):
+    """Result of re-evaluating a recorded trace with updated assertions.
+
+    Links back to the original trace via original_trace_id and stores
+    new evaluation results, score, and pass/fail status.
+    """
+
+    model_config = {"extra": "forbid"}
+
+    reeval_id: str
+    original_trace_id: str
+    scenario_name: str
+    scenario_file: str | None = None
+    eval_results: list[EvalResult]
+    score: float
+    passed: bool
+    threshold: float
+    evaluated_at: datetime
+    assertions_used: int
+    assertions_skipped: int = 0
 
 
 def validate_trace_version(metadata: TraceMetadata) -> None:
