@@ -165,7 +165,7 @@ def test_run_command_saves_to_store(tmp_path: Path):
 
     with (
         patch("salvo.cli.run_cmd.get_adapter", side_effect=_mock_adapter_factory()),
-        patch("salvo.cli.run_cmd._find_project_root", return_value=tmp_path),
+        patch("salvo.cli.run_cmd.find_project_root", return_value=tmp_path),
     ):
         result = runner.invoke(app, ["run", str(scenario_file), "-n", "1"])
 
@@ -209,7 +209,7 @@ def test_run_command_saves_suite_with_latest(tmp_path: Path):
 
     with (
         patch("salvo.cli.run_cmd.get_adapter", side_effect=_mock_adapter_factory()),
-        patch("salvo.cli.run_cmd._find_project_root", return_value=tmp_path),
+        patch("salvo.cli.run_cmd.find_project_root", return_value=tmp_path),
     ):
         result = runner.invoke(app, ["run", str(scenario_file), "-n", "1"])
 
@@ -235,7 +235,7 @@ def test_run_command_assertions_pass(tmp_path: Path):
 
     with (
         patch("salvo.cli.run_cmd.get_adapter", side_effect=_mock_adapter_factory()),
-        patch("salvo.cli.run_cmd._find_project_root", return_value=tmp_path),
+        patch("salvo.cli.run_cmd.find_project_root", return_value=tmp_path),
     ):
         result = runner.invoke(app, ["run", str(scenario_file), "-n", "1"])
 
@@ -258,7 +258,7 @@ def test_run_command_assertions_fail(tmp_path: Path):
 
     with (
         patch("salvo.cli.run_cmd.get_adapter", side_effect=_mock_adapter_factory()),
-        patch("salvo.cli.run_cmd._find_project_root", return_value=tmp_path),
+        patch("salvo.cli.run_cmd.find_project_root", return_value=tmp_path),
     ):
         result = runner.invoke(app, ["run", str(scenario_file), "-n", "1"])
 
@@ -282,7 +282,7 @@ def test_run_command_required_assertion_hard_fail(tmp_path: Path):
 
     with (
         patch("salvo.cli.run_cmd.get_adapter", side_effect=_mock_adapter_factory()),
-        patch("salvo.cli.run_cmd._find_project_root", return_value=tmp_path),
+        patch("salvo.cli.run_cmd.find_project_root", return_value=tmp_path),
     ):
         result = runner.invoke(app, ["run", str(scenario_file), "-n", "1"])
 
@@ -304,7 +304,7 @@ def test_run_command_persists_real_score(tmp_path: Path):
 
     with (
         patch("salvo.cli.run_cmd.get_adapter", side_effect=_mock_adapter_factory()),
-        patch("salvo.cli.run_cmd._find_project_root", return_value=tmp_path),
+        patch("salvo.cli.run_cmd.find_project_root", return_value=tmp_path),
     ):
         result = runner.invoke(app, ["run", str(scenario_file), "-n", "1"])
 

@@ -19,25 +19,12 @@ from rich.console import Console
 from rich.table import Table
 
 from salvo.evaluation.normalizer import normalize_assertions
+from salvo.models.config import find_project_root, load_project_config
 from salvo.recording.models import RevalResult
 from salvo.storage.json_store import RunStore
 
 # Assertion types that require message content to evaluate
 _CONTENT_DEPENDENT_TYPES = {"jmespath", "judge", "custom"}
-
-
-def _find_project_root() -> Path:
-    """Find project root by walking up from cwd looking for .salvo/.
-
-    Returns:
-        Path to directory containing .salvo/, or cwd if not found.
-    """
-    current = Path.cwd().resolve()
-    while current != current.parent:
-        if (current / ".salvo").exists():
-            return current
-        current = current.parent
-    return Path.cwd()
 
 
 def reeval(
@@ -89,8 +76,9 @@ async def _reeval_async(
     console = Console()
 
     # Find project root and create store
-    project_root = _find_project_root()
-    store = RunStore(project_root)
+    project_root = find_project_root()
+    project_config = load_project_config(project_root)
+    store = RunStore(project_root, storage_dir=project_config.storage_dir)
 
     # Load recorded trace
     recorded = store.load_recorded_trace(run_id)
@@ -148,6 +136,12 @@ async def _reeval_async(
     for a in normalized_assertions:
         if a.get("type") == "judge":
             a["_scenario"] = scenario
+
+    # Inject project-level judge config for resolution in JudgeEvaluator
+    if project_config.judge:
+        for a in normalized_assertions:
+            if a.get("type") == "judge":
+                a["_project_judge_config"] = project_config.judge.model_dump()
 
     assertions_skipped = 0
     if metadata_only:

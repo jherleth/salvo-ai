@@ -130,15 +130,34 @@ class JudgeEvaluator(BaseEvaluator):
         required = assertion.get("required", False)
         include_sp = assertion.get("include_system_prompt", False)
         custom_prompt = assertion.get("custom_prompt")
-        threshold = assertion.get("threshold", 0.8)
 
-        # Resolve judge config (merge defaults)
-        config = resolve_judge_config(assertion)
+        # Extract injected project judge config and verbose flag
+        project_judge_dict = assertion.pop("_project_judge_config", None)
+        verbose = assertion.pop("_verbose", False)
+
+        # Resolve default_threshold from project config
+        default_threshold = 0.8
+        if project_judge_dict and "default_threshold" in project_judge_dict:
+            default_threshold = project_judge_dict["default_threshold"]
+        threshold = assertion.get("threshold", default_threshold)
+
+        # Resolve judge config (merge defaults with project config)
+        config = resolve_judge_config(assertion, project_config=project_judge_dict)
         judge_model = config["judge_model"]
         k = config["k"]
         judge_adapter_name = config["judge_adapter"]
         temperature = config["temperature"]
         max_tokens = config["max_tokens"]
+
+        # Warn when k=1 disables majority voting (verbose-only)
+        if k == 1 and verbose:
+            import sys
+
+            print(
+                f"[salvo] warning: k=1 for judge assertion '{assertion.get('name', '?')}' "
+                "-- majority voting is disabled",
+                file=sys.stderr,
+            )
 
         # Build context and prompts
         scenario = assertion.get("_scenario")

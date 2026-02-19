@@ -15,6 +15,7 @@ from rich import box
 from rich.console import Console
 from rich.table import Table
 
+from salvo.models.config import find_project_root, load_project_config
 from salvo.models.trial import TrialSuiteResult, Verdict
 from salvo.storage.json_store import RunStore
 
@@ -32,20 +33,6 @@ def _verdict_display(verdict: Verdict) -> tuple[str, str]:
     """Return (symbol, style) for a verdict value."""
     value = verdict.value if hasattr(verdict, "value") else str(verdict)
     return _VERDICT_STYLES.get(value, ("\u2717 UNKNOWN", "bold red"))
-
-
-def _find_project_root() -> Path:
-    """Find project root by walking up from cwd looking for .salvo/.
-
-    Returns:
-        Path to directory containing .salvo/, or cwd if not found.
-    """
-    current = Path.cwd().resolve()
-    while current != current.parent:
-        if (current / ".salvo").exists():
-            return current
-        current = current.parent
-    return Path.cwd()
 
 
 def _render_run_detail(
@@ -215,12 +202,13 @@ def report(
     console = Console()
 
     # Find project root and create store
-    project_root = _find_project_root()
-    if not (project_root / ".salvo").exists():
+    project_root = find_project_root()
+    project_config = load_project_config(project_root)
+    if not (project_root / project_config.storage_dir).exists():
         console.print("[dim]No .salvo/ directory found. Run 'salvo run' first.[/dim]")
         raise typer.Exit(code=0)
 
-    store = RunStore(project_root)
+    store = RunStore(project_root, storage_dir=project_config.storage_dir)
 
     if history:
         # History mode: show trend table of recent runs

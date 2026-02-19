@@ -16,9 +16,11 @@ from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    from salvo.models.config import ProjectConfig
     from salvo.storage.json_store import RunStore
 
 from salvo.adapters.base import AdapterConfig, BaseAdapter
+from salvo.evaluation.normalizer import normalize_assertions
 from salvo.evaluation.aggregation import (
     aggregate_failures,
     compute_aggregate_metrics,
@@ -50,6 +52,8 @@ class TrialRunner:
         early_stop: bool = False,
         threshold: float = 1.0,
         store: RunStore | None = None,
+        project_config: ProjectConfig | None = None,
+        verbose: bool = False,
     ) -> None:
         self._adapter_factory = adapter_factory
         self._scenario = scenario
@@ -60,6 +64,8 @@ class TrialRunner:
         self._early_stop = early_stop
         self._threshold = threshold
         self._store = store
+        self._project_config = project_config
+        self._verbose = verbose
         self._manifest_lock: asyncio.Lock | None = None
 
     async def run_all(
@@ -175,10 +181,29 @@ class TrialRunner:
                     for a in self._scenario.assertions
                 ]
 
+                # Defensive normalization (safe no-op for already-normalized assertions)
+                try:
+                    raw_assertions = normalize_assertions(raw_assertions)
+                except ValueError:
+                    # Malformed assertions -- let evaluator handle individually
+                    pass
+
                 # Inject scenario reference for judge assertions
                 for a in raw_assertions:
                     if a.get("type") == "judge":
                         a["_scenario"] = self._scenario
+
+                # Inject project-level judge config for resolution in JudgeEvaluator
+                if self._project_config and self._project_config.judge:
+                    for a in raw_assertions:
+                        if a.get("type") == "judge":
+                            a["_project_judge_config"] = self._project_config.judge.model_dump()
+
+                # Inject verbose flag for judge assertion warnings
+                if self._verbose:
+                    for a in raw_assertions:
+                        if a.get("type") == "judge":
+                            a["_verbose"] = True
 
                 eval_results, score, passed = await evaluate_trace_async(
                     trace, raw_assertions, self._threshold,

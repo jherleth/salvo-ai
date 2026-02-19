@@ -542,3 +542,111 @@ class TestTrialRunnerAllInfraError:
         assert result.trials_passed == 0
         assert result.score_avg == 0.0
         assert result.pass_rate == 0.0
+
+
+class TestTrialRunnerProjectConfig:
+    """Test project_config threading and defensive normalization."""
+
+    @pytest.mark.asyncio
+    async def test_accepts_project_config(self):
+        """TrialRunner accepts project_config parameter without error."""
+        from salvo.models.config import ProjectConfig
+
+        _created, factory = _make_passing_factory()
+        scenario = _make_scenario()
+        config = _make_config()
+        project_config = ProjectConfig()
+
+        runner = TrialRunner(
+            adapter_factory=factory,
+            scenario=scenario,
+            config=config,
+            n_trials=1,
+            threshold=0.8,
+            project_config=project_config,
+        )
+        result = await runner.run_all()
+        assert result.verdict == Verdict.PASS
+
+    @pytest.mark.asyncio
+    async def test_normalize_assertions_called(self):
+        """Verify normalize_assertions is called during trial execution."""
+        _created, factory = _make_passing_factory()
+        scenario = _make_scenario(
+            assertions=[
+                Assertion(
+                    type="jmespath",
+                    expression="response.content",
+                    operator="contains",
+                    value="Hello",
+                    weight=1.0,
+                ),
+            ],
+        )
+        config = _make_config()
+
+        with patch(
+            "salvo.execution.trial_runner.normalize_assertions",
+            wraps=__import__("salvo.evaluation.normalizer", fromlist=["normalize_assertions"]).normalize_assertions,
+        ) as mock_normalize:
+            runner = TrialRunner(
+                adapter_factory=factory,
+                scenario=scenario,
+                config=config,
+                n_trials=1,
+                threshold=0.8,
+            )
+            await runner.run_all()
+            assert mock_normalize.call_count >= 1
+
+    @pytest.mark.asyncio
+    async def test_project_judge_config_injected(self):
+        """Verify _project_judge_config injected into judge assertions."""
+        from salvo.models.config import JudgeConfig, ProjectConfig
+
+        _created, factory = _make_passing_factory()
+        scenario = _make_scenario(
+            assertions=[
+                Assertion(
+                    type="judge",
+                    criteria=[{"name": "accuracy", "description": "Is correct"}],
+                    weight=1.0,
+                ),
+            ],
+        )
+        config = _make_config()
+        project_config = ProjectConfig(
+            judge=JudgeConfig(adapter="anthropic", model="claude-haiku-4-5", k=5),
+        )
+
+        # We mock evaluate_trace_async to capture the assertions passed to it
+        captured_assertions = []
+
+        async def capture_eval(trace, assertions, threshold):
+            captured_assertions.extend(assertions)
+            from salvo.models.result import EvalResult
+            return (
+                [EvalResult(assertion_type="judge", score=1.0, passed=True, weight=1.0, required=False, details="ok")],
+                1.0,
+                True,
+            )
+
+        with patch("salvo.execution.trial_runner.evaluate_trace_async", side_effect=capture_eval):
+            runner = TrialRunner(
+                adapter_factory=factory,
+                scenario=scenario,
+                config=config,
+                n_trials=1,
+                threshold=0.8,
+                project_config=project_config,
+            )
+            await runner.run_all()
+
+        # Check that _project_judge_config was injected
+        judge_assertions = [a for a in captured_assertions if a.get("type") == "judge"]
+        assert len(judge_assertions) == 1
+        pjc = judge_assertions[0].get("_project_judge_config")
+        assert pjc is not None
+        assert pjc["adapter"] == "anthropic"
+        assert pjc["model"] == "claude-haiku-4-5"
+        assert pjc["k"] == 5

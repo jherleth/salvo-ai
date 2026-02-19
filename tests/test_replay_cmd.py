@@ -93,7 +93,7 @@ def test_replay_no_recorded_traces(tmp_path):
     salvo_dir = tmp_path / ".salvo" / "traces"
     salvo_dir.mkdir(parents=True, exist_ok=True)
 
-    with patch("salvo.cli.replay_cmd._find_project_root", return_value=tmp_path):
+    with patch("salvo.cli.replay_cmd.find_project_root", return_value=tmp_path):
         result = runner.invoke(app, ["replay"])
 
     assert result.exit_code == 0
@@ -106,7 +106,7 @@ def test_replay_latest_trace(tmp_path):
     trace_data = _make_recorded_trace()
     _write_recorded_trace(tmp_path, trace_data)
 
-    with patch("salvo.cli.replay_cmd._find_project_root", return_value=tmp_path):
+    with patch("salvo.cli.replay_cmd.find_project_root", return_value=tmp_path):
         result = runner.invoke(app, ["replay"])
 
     assert result.exit_code == 0
@@ -124,7 +124,7 @@ def test_replay_specific_run_id(tmp_path):
     trace_data = _make_recorded_trace(run_id="specific-run")
     _write_recorded_trace(tmp_path, trace_data, trace_id="specific-run")
 
-    with patch("salvo.cli.replay_cmd._find_project_root", return_value=tmp_path):
+    with patch("salvo.cli.replay_cmd.find_project_root", return_value=tmp_path):
         result = runner.invoke(app, ["replay", "specific-run"])
 
     assert result.exit_code == 0
@@ -141,7 +141,7 @@ def test_replay_metadata_only_warning(tmp_path):
         msg["content"] = "[CONTENT_EXCLUDED]"
     _write_recorded_trace(tmp_path, trace_data)
 
-    with patch("salvo.cli.replay_cmd._find_project_root", return_value=tmp_path):
+    with patch("salvo.cli.replay_cmd.find_project_root", return_value=tmp_path):
         result = runner.invoke(app, ["replay"])
 
     assert result.exit_code == 0
@@ -164,7 +164,7 @@ def test_replay_message_summary(tmp_path):
     trace_data = _make_recorded_trace()
     _write_recorded_trace(tmp_path, trace_data)
 
-    with patch("salvo.cli.replay_cmd._find_project_root", return_value=tmp_path):
+    with patch("salvo.cli.replay_cmd.find_project_root", return_value=tmp_path):
         result = runner.invoke(app, ["replay"])
 
     assert result.exit_code == 0
@@ -178,7 +178,7 @@ def test_replay_cost_display(tmp_path):
     trace_data = _make_recorded_trace()
     _write_recorded_trace(tmp_path, trace_data)
 
-    with patch("salvo.cli.replay_cmd._find_project_root", return_value=tmp_path):
+    with patch("salvo.cli.replay_cmd.find_project_root", return_value=tmp_path):
         result = runner.invoke(app, ["replay"])
 
     assert result.exit_code == 0
@@ -192,7 +192,7 @@ def test_replay_cost_none(tmp_path):
     trace_data["trace"]["cost_usd"] = None
     _write_recorded_trace(tmp_path, trace_data)
 
-    with patch("salvo.cli.replay_cmd._find_project_root", return_value=tmp_path):
+    with patch("salvo.cli.replay_cmd.find_project_root", return_value=tmp_path):
         result = runner.invoke(app, ["replay"])
 
     assert result.exit_code == 0

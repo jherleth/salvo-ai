@@ -18,22 +18,9 @@ from rich import box
 from rich.console import Console
 from rich.table import Table
 
+from salvo.models.config import find_project_root, load_project_config
 from salvo.recording.replayer import TraceReplayer
 from salvo.storage.json_store import RunStore
-
-
-def _find_project_root() -> Path:
-    """Find project root by walking up from cwd looking for .salvo/.
-
-    Returns:
-        Path to directory containing .salvo/, or cwd if not found.
-    """
-    current = Path.cwd().resolve()
-    while current != current.parent:
-        if (current / ".salvo").exists():
-            return current
-        current = current.parent
-    return Path.cwd()
 
 
 def replay(
@@ -53,8 +40,9 @@ def replay(
     console.print("\n[bold cyan]══════════ [REPLAY] ══════════[/bold cyan]\n")
 
     # Find project root and create store
-    project_root = _find_project_root()
-    store = RunStore(project_root)
+    project_root = find_project_root()
+    project_config = load_project_config(project_root)
+    store = RunStore(project_root, storage_dir=project_config.storage_dir)
     replayer = TraceReplayer(store)
 
     # Load trace with error handling for corrupt files

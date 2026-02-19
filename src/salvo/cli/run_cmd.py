@@ -25,6 +25,7 @@ from salvo.cli.output import (
 from salvo.execution.extras import validate_extras
 from salvo.execution.trial_runner import TrialRunner
 from salvo.loader.validator import validate_scenario_file
+from salvo.models.config import find_project_root, load_project_config
 from salvo.models.trial import Verdict
 from salvo.storage.json_store import RunStore
 
@@ -134,9 +135,10 @@ async def _run_async(
     # 6. Determine threshold
     effective_threshold = threshold_override if threshold_override is not None else scenario.threshold
 
-    # 6b. Create store early so it can be passed to TrialRunner for immediate trace persistence
-    project_root = _find_project_root(filepath)
-    store = RunStore(project_root)
+    # 6b. Load project config and create store
+    project_root = find_project_root(filepath)
+    project_config = load_project_config(project_root)
+    store = RunStore(project_root, storage_dir=project_config.storage_dir)
 
     # 7. Create TrialRunner
     runner = TrialRunner(
@@ -149,6 +151,8 @@ async def _run_async(
         early_stop=early_stop,
         threshold=effective_threshold,
         store=store,
+        project_config=project_config,
+        verbose=verbose,
     )
 
     # 8. Output console (stdout for results, stderr for progress)
@@ -179,14 +183,13 @@ async def _run_async(
 
     # 12. Record traces if --record flag set
     if record:
-        from salvo.recording.recorder import TraceRecorder, load_project_config
+        from salvo.recording.recorder import TraceRecorder
 
-        proj_config = load_project_config(project_root)
         recorder = TraceRecorder(
             store=store,
             project_root=project_root,
-            recording_mode=proj_config.recording.mode,
-            custom_patterns=proj_config.recording.custom_redaction_patterns or None,
+            recording_mode=project_config.recording.mode,
+            custom_patterns=project_config.recording.custom_redaction_patterns or None,
         )
         recorder.record_suite(suite, scenario, str(filepath))
         store.mark_run_recorded(suite.run_id)
@@ -240,24 +243,3 @@ async def _run_async(
         raise typer.Exit(code=exit_code)
 
 
-def _find_project_root(scenario_path: Path) -> Path:
-    """Find the project root by looking for .salvo/ directory or using cwd.
-
-    Walks up from the scenario file directory looking for an existing
-    .salvo/ directory. If not found, uses the current working directory.
-
-    Args:
-        scenario_path: Path to the scenario file.
-
-    Returns:
-        Path to the project root directory.
-    """
-    # Try walking up from scenario file
-    current = scenario_path.resolve().parent
-    while current != current.parent:
-        if (current / ".salvo").exists():
-            return current
-        current = current.parent
-
-    # Fall back to cwd
-    return Path.cwd()

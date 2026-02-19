@@ -152,7 +152,7 @@ def test_reeval_with_snapshot_assertions(tmp_path):
     _write_recorded_trace(tmp_path, trace_data)
 
     with (
-        patch("salvo.cli.reeval_cmd._find_project_root", return_value=tmp_path),
+        patch("salvo.cli.reeval_cmd.find_project_root", return_value=tmp_path),
         patch(
             "salvo.evaluation.scorer.evaluate_trace_async",
             new_callable=AsyncMock,
@@ -187,7 +187,7 @@ def test_reeval_with_updated_scenario(tmp_path):
     scenario_file = _write_scenario_file(tmp_path, scenario)
 
     with (
-        patch("salvo.cli.reeval_cmd._find_project_root", return_value=tmp_path),
+        patch("salvo.cli.reeval_cmd.find_project_root", return_value=tmp_path),
         patch(
             "salvo.evaluation.scorer.evaluate_trace_async",
             new_callable=AsyncMock,
@@ -207,7 +207,7 @@ def test_reeval_original_trace_id_set(tmp_path):
     _write_recorded_trace(tmp_path, trace_data)
 
     with (
-        patch("salvo.cli.reeval_cmd._find_project_root", return_value=tmp_path),
+        patch("salvo.cli.reeval_cmd.find_project_root", return_value=tmp_path),
         patch(
             "salvo.evaluation.scorer.evaluate_trace_async",
             new_callable=AsyncMock,
@@ -237,7 +237,7 @@ def test_reeval_metadata_only_strict_by_default(tmp_path):
     ]
     _write_recorded_trace(tmp_path, trace_data)
 
-    with patch("salvo.cli.reeval_cmd._find_project_root", return_value=tmp_path):
+    with patch("salvo.cli.reeval_cmd.find_project_root", return_value=tmp_path):
         result = runner.invoke(app, ["reeval", "test-run-001"])
 
     assert result.exit_code == 1
@@ -256,7 +256,7 @@ def test_reeval_metadata_only_skips_content_assertions_with_flag(tmp_path):
     _write_recorded_trace(tmp_path, trace_data)
 
     with (
-        patch("salvo.cli.reeval_cmd._find_project_root", return_value=tmp_path),
+        patch("salvo.cli.reeval_cmd.find_project_root", return_value=tmp_path),
         patch(
             "salvo.evaluation.scorer.evaluate_trace_async",
             new_callable=AsyncMock,
@@ -287,7 +287,7 @@ def test_reeval_nonexistent_run_id(tmp_path):
     # Create the .salvo dir but no traces
     (tmp_path / ".salvo" / "traces").mkdir(parents=True, exist_ok=True)
 
-    with patch("salvo.cli.reeval_cmd._find_project_root", return_value=tmp_path):
+    with patch("salvo.cli.reeval_cmd.find_project_root", return_value=tmp_path):
         result = runner.invoke(app, ["reeval", "nonexistent-id"])
 
     assert result.exit_code == 1
@@ -300,7 +300,7 @@ def test_reeval_result_saved_to_revals_dir(tmp_path):
     _write_recorded_trace(tmp_path, trace_data)
 
     with (
-        patch("salvo.cli.reeval_cmd._find_project_root", return_value=tmp_path),
+        patch("salvo.cli.reeval_cmd.find_project_root", return_value=tmp_path),
         patch(
             "salvo.evaluation.scorer.evaluate_trace_async",
             new_callable=AsyncMock,
@@ -328,7 +328,7 @@ def test_reeval_list_runs_not_contaminated(tmp_path):
     _write_recorded_trace(tmp_path, trace_data)
 
     with (
-        patch("salvo.cli.reeval_cmd._find_project_root", return_value=tmp_path),
+        patch("salvo.cli.reeval_cmd.find_project_root", return_value=tmp_path),
         patch(
             "salvo.evaluation.scorer.evaluate_trace_async",
             new_callable=AsyncMock,
@@ -353,7 +353,7 @@ def test_reeval_exit_code_pass(tmp_path):
     _write_recorded_trace(tmp_path, trace_data)
 
     with (
-        patch("salvo.cli.reeval_cmd._find_project_root", return_value=tmp_path),
+        patch("salvo.cli.reeval_cmd.find_project_root", return_value=tmp_path),
         patch(
             "salvo.evaluation.scorer.evaluate_trace_async",
             new_callable=AsyncMock,
@@ -371,7 +371,7 @@ def test_reeval_exit_code_fail(tmp_path):
     _write_recorded_trace(tmp_path, trace_data)
 
     with (
-        patch("salvo.cli.reeval_cmd._find_project_root", return_value=tmp_path),
+        patch("salvo.cli.reeval_cmd.find_project_root", return_value=tmp_path),
         patch(
             "salvo.evaluation.scorer.evaluate_trace_async",
             new_callable=AsyncMock,
@@ -392,7 +392,7 @@ def test_reeval_metadata_only_all_content_assertions(tmp_path):
     ]
     _write_recorded_trace(tmp_path, trace_data)
 
-    with patch("salvo.cli.reeval_cmd._find_project_root", return_value=tmp_path):
+    with patch("salvo.cli.reeval_cmd.find_project_root", return_value=tmp_path):
         result = runner.invoke(app, ["reeval", "test-run-001"])
 
     assert result.exit_code == 1

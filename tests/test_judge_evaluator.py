@@ -236,3 +236,185 @@ class TestResolveJudgeConfig:
         assert result["k"] == 7
         assert result["temperature"] == 0.5
         assert result["max_tokens"] == 2048
+
+    def test_resolve_judge_config_assertion_overrides_project(self):
+        """Assertion-level overrides take precedence over project-level."""
+        project_config = {
+            "adapter": "anthropic",
+            "model": "claude-haiku-4-5",
+            "k": 7,
+        }
+        assertion = {"judge_model": "gpt-4o", "k": 1}
+        result = resolve_judge_config(assertion, project_config=project_config)
+        # Assertion-level wins
+        assert result["judge_model"] == "gpt-4o"
+        assert result["k"] == 1
+        # Project-level for unoverridden
+        assert result["judge_adapter"] == "anthropic"
+
+
+class TestDefaultThresholdFromProject:
+    """Test that default_threshold from project config flows through."""
+
+    @pytest.mark.asyncio
+    async def test_project_default_threshold_used(self):
+        """JudgeEvaluator uses default_threshold from project config when assertion lacks threshold."""
+        mock_adapter = MagicMock()
+        mock_adapter.provider_name.return_value = "openai"
+        mock_adapter.send_turn = AsyncMock(
+            return_value=_make_adapter_result(
+                {
+                    "accuracy": {"score": 0.65, "reasoning": "Decent"},
+                    "clarity": {"score": 0.6, "reasoning": "OK"},
+                }
+            )
+        )
+
+        assertion = {
+            "type": "judge",
+            "criteria": [
+                {"name": "accuracy", "description": "Factually correct", "weight": 1.0},
+                {"name": "clarity", "description": "Easy to understand", "weight": 0.5},
+            ],
+            "weight": 1.0,
+            "required": False,
+            # No threshold set -- should use default from project config
+            "_project_judge_config": {
+                "adapter": "openai",
+                "model": "gpt-4o-mini",
+                "k": 3,
+                "temperature": 0.0,
+                "max_tokens": 1024,
+                "default_threshold": 0.5,  # Lower threshold
+            },
+        }
+
+        evaluator = JudgeEvaluator()
+        with patch(
+            "salvo.evaluation.evaluators.judge.get_adapter", return_value=mock_adapter
+        ), patch(
+            "salvo.evaluation.evaluators.judge.estimate_cost", return_value=0.001
+        ):
+            result = await evaluator.evaluate_async(_make_trace(), assertion)
+
+        # With default_threshold=0.5, scores of 0.65/0.6 should pass
+        assert result.passed is True
+
+    @pytest.mark.asyncio
+    async def test_assertion_threshold_overrides_project(self):
+        """Assertion-level threshold takes precedence over project default_threshold."""
+        mock_adapter = MagicMock()
+        mock_adapter.provider_name.return_value = "openai"
+        mock_adapter.send_turn = AsyncMock(
+            return_value=_make_adapter_result(
+                {
+                    "accuracy": {"score": 0.65, "reasoning": "Decent"},
+                    "clarity": {"score": 0.6, "reasoning": "OK"},
+                }
+            )
+        )
+
+        assertion = {
+            "type": "judge",
+            "criteria": [
+                {"name": "accuracy", "description": "Factually correct", "weight": 1.0},
+                {"name": "clarity", "description": "Easy to understand", "weight": 0.5},
+            ],
+            "weight": 1.0,
+            "required": False,
+            "threshold": 0.9,  # High threshold set on assertion
+            "_project_judge_config": {
+                "adapter": "openai",
+                "model": "gpt-4o-mini",
+                "k": 3,
+                "temperature": 0.0,
+                "max_tokens": 1024,
+                "default_threshold": 0.5,  # Lower project default
+            },
+        }
+
+        evaluator = JudgeEvaluator()
+        with patch(
+            "salvo.evaluation.evaluators.judge.get_adapter", return_value=mock_adapter
+        ), patch(
+            "salvo.evaluation.evaluators.judge.estimate_cost", return_value=0.001
+        ):
+            result = await evaluator.evaluate_async(_make_trace(), assertion)
+
+        # Assertion threshold 0.9 overrides project 0.5; scores 0.65/0.6 should fail
+        assert result.passed is False
+
+
+class TestK1VerboseWarning:
+    """Test that k=1 emits a warning when verbose is active."""
+
+    @pytest.mark.asyncio
+    async def test_k1_verbose_warning_emitted(self, capsys):
+        """k=1 with _verbose=True emits a warning to stderr."""
+        mock_adapter = MagicMock()
+        mock_adapter.provider_name.return_value = "openai"
+        mock_adapter.send_turn = AsyncMock(
+            return_value=_make_adapter_result(
+                {
+                    "accuracy": {"score": 0.9, "reasoning": "Good"},
+                }
+            )
+        )
+
+        assertion = {
+            "type": "judge",
+            "criteria": [
+                {"name": "accuracy", "description": "Factually correct", "weight": 1.0},
+            ],
+            "weight": 1.0,
+            "required": False,
+            "k": 1,
+            "_verbose": True,
+        }
+
+        evaluator = JudgeEvaluator()
+        with patch(
+            "salvo.evaluation.evaluators.judge.get_adapter", return_value=mock_adapter
+        ), patch(
+            "salvo.evaluation.evaluators.judge.estimate_cost", return_value=0.001
+        ):
+            await evaluator.evaluate_async(_make_trace(), assertion)
+
+        captured = capsys.readouterr()
+        assert "k=1" in captured.err
+        assert "majority voting is disabled" in captured.err
+
+    @pytest.mark.asyncio
+    async def test_k1_no_verbose_no_warning(self, capsys):
+        """k=1 without _verbose does NOT emit a warning."""
+        mock_adapter = MagicMock()
+        mock_adapter.provider_name.return_value = "openai"
+        mock_adapter.send_turn = AsyncMock(
+            return_value=_make_adapter_result(
+                {
+                    "accuracy": {"score": 0.9, "reasoning": "Good"},
+                }
+            )
+        )
+
+        assertion = {
+            "type": "judge",
+            "criteria": [
+                {"name": "accuracy", "description": "Factually correct", "weight": 1.0},
+            ],
+            "weight": 1.0,
+            "required": False,
+            "k": 1,
+            # No _verbose flag
+        }
+
+        evaluator = JudgeEvaluator()
+        with patch(
+            "salvo.evaluation.evaluators.judge.get_adapter", return_value=mock_adapter
+        ), patch(
+            "salvo.evaluation.evaluators.judge.estimate_cost", return_value=0.001
+        ):
+            await evaluator.evaluate_async(_make_trace(), assertion)
+
+        captured = capsys.readouterr()
+        assert "majority voting is disabled" not in captured.err

@@ -143,7 +143,7 @@ class TestReportLatest:
         store.save_suite_result(suite)
         store.update_latest_symlink("latest-001")
 
-        with patch("salvo.cli.report_cmd._find_project_root", return_value=tmp_path):
+        with patch("salvo.cli.report_cmd.find_project_root", return_value=tmp_path):
             result = runner.invoke(app, ["report"])
 
         assert result.exit_code == 0
@@ -170,7 +170,7 @@ class TestReportLatest:
         store.save_suite_result(suite2)
         store.update_latest_symlink("run-bbb")
 
-        with patch("salvo.cli.report_cmd._find_project_root", return_value=tmp_path):
+        with patch("salvo.cli.report_cmd.find_project_root", return_value=tmp_path):
             result = runner.invoke(app, ["report", "run-aaa"])
 
         assert result.exit_code == 0
@@ -181,7 +181,7 @@ class TestReportLatest:
         """Report with empty store shows helpful message."""
         _setup_store(tmp_path)
 
-        with patch("salvo.cli.report_cmd._find_project_root", return_value=tmp_path):
+        with patch("salvo.cli.report_cmd.find_project_root", return_value=tmp_path):
             result = runner.invoke(app, ["report"])
 
         assert result.exit_code == 0
@@ -193,7 +193,7 @@ class TestReportLatest:
         suite = _make_suite(run_id="existing-run")
         store.save_suite_result(suite)
 
-        with patch("salvo.cli.report_cmd._find_project_root", return_value=tmp_path):
+        with patch("salvo.cli.report_cmd.find_project_root", return_value=tmp_path):
             result = runner.invoke(app, ["report", "nonexistent"])
 
         assert result.exit_code == 1
@@ -220,7 +220,7 @@ class TestReportHistory:
             )
             store.save_suite_result(suite)
 
-        with patch("salvo.cli.report_cmd._find_project_root", return_value=tmp_path):
+        with patch("salvo.cli.report_cmd.find_project_root", return_value=tmp_path):
             result = runner.invoke(app, ["report", "--history"])
 
         assert result.exit_code == 0
@@ -240,7 +240,7 @@ class TestReportHistory:
             )
             store.save_suite_result(suite)
 
-        with patch("salvo.cli.report_cmd._find_project_root", return_value=tmp_path):
+        with patch("salvo.cli.report_cmd.find_project_root", return_value=tmp_path):
             result = runner.invoke(app, ["report", "--history", "--limit", "2"])
 
         assert result.exit_code == 0
@@ -255,7 +255,7 @@ class TestReportHistory:
         """History with no runs shows message."""
         _setup_store(tmp_path)
 
-        with patch("salvo.cli.report_cmd._find_project_root", return_value=tmp_path):
+        with patch("salvo.cli.report_cmd.find_project_root", return_value=tmp_path):
             result = runner.invoke(app, ["report", "--history"])
 
         assert result.exit_code == 0
@@ -281,7 +281,7 @@ class TestReportScenarioFilter:
         store.save_suite_result(suite_b)
         store.save_suite_result(suite_a2)
 
-        with patch("salvo.cli.report_cmd._find_project_root", return_value=tmp_path):
+        with patch("salvo.cli.report_cmd.find_project_root", return_value=tmp_path):
             result = runner.invoke(
                 app, ["report", "--history", "--scenario", "alpha"]
             )
@@ -298,7 +298,7 @@ class TestReportScenarioFilter:
         suite = _make_suite(run_id="only-run", scenario_name="gamma")
         store.save_suite_result(suite)
 
-        with patch("salvo.cli.report_cmd._find_project_root", return_value=tmp_path):
+        with patch("salvo.cli.report_cmd.find_project_root", return_value=tmp_path):
             result = runner.invoke(
                 app, ["report", "--history", "--scenario", "nonexistent"]
             )
@@ -347,7 +347,7 @@ class TestReportFailuresOnly:
         store.save_suite_result(suite)
         store.update_latest_symlink("fail-detail")
 
-        with patch("salvo.cli.report_cmd._find_project_root", return_value=tmp_path):
+        with patch("salvo.cli.report_cmd.find_project_root", return_value=tmp_path):
             result = runner.invoke(app, ["report", "--failures"])
 
         assert result.exit_code == 0
@@ -372,7 +372,7 @@ class TestReportFailuresOnly:
         store.save_suite_result(pass_suite)
         store.save_suite_result(fail_suite)
 
-        with patch("salvo.cli.report_cmd._find_project_root", return_value=tmp_path):
+        with patch("salvo.cli.report_cmd.find_project_root", return_value=tmp_path):
             result = runner.invoke(app, ["report", "--history", "--failures"])
 
         assert result.exit_code == 0
