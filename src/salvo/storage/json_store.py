@@ -16,7 +16,7 @@ from uuid import uuid7
 from salvo.execution.trace import RunTrace
 from salvo.models.result import RunResult
 from salvo.models.trial import TrialSuiteResult
-from salvo.recording.models import RecordedTrace, validate_trace_version
+from salvo.recording.models import RecordedTrace, RevalResult, validate_trace_version
 
 
 class RunStore:
@@ -36,12 +36,14 @@ class RunStore:
         self.salvo_dir = project_root / ".salvo"
         self.runs_dir = self.salvo_dir / "runs"
         self.traces_dir = self.salvo_dir / "traces"
+        self.revals_dir = self.salvo_dir / "revals"
         self.index_path = self.salvo_dir / "index.json"
 
     def ensure_dirs(self) -> None:
-        """Create .salvo/runs/ and .salvo/traces/ directory structure."""
+        """Create .salvo/runs/, .salvo/traces/, and .salvo/revals/ directories."""
         self.runs_dir.mkdir(parents=True, exist_ok=True)
         self.traces_dir.mkdir(parents=True, exist_ok=True)
+        self.revals_dir.mkdir(parents=True, exist_ok=True)
 
     def save_run(self, run_result: RunResult) -> str:
         """Save a RunResult as a JSON file and update the index.
@@ -363,6 +365,27 @@ class RunStore:
             f.name.removesuffix(".recorded.json")
             for f in self.traces_dir.glob("*.recorded.json")
         )
+
+    # -- Re-evaluation result methods --
+
+    def save_reeval_result(self, result: RevalResult) -> None:
+        """Save a RevalResult as JSON in .salvo/revals/{reeval_id}.json.
+
+        Uses atomic write pattern (write .tmp, rename). Stored separately
+        from runs to avoid contaminating list_runs().
+
+        Args:
+            result: The RevalResult to persist.
+        """
+        self.revals_dir.mkdir(parents=True, exist_ok=True)
+
+        content = result.model_dump_json(indent=2)
+
+        # Atomic write
+        result_file = self.revals_dir / f"{result.reeval_id}.json"
+        tmp_file = self.revals_dir / f"{result.reeval_id}.json.tmp"
+        tmp_file.write_text(content, encoding="utf-8")
+        tmp_file.rename(result_file)
 
     def _load_index(self) -> dict[str, list[str]]:
         """Load the scenario-to-runs index file.
