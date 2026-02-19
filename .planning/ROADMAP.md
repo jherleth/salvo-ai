@@ -2,7 +2,7 @@
 
 ## Overview
 
-Salvo is a CLI testing framework for multi-step AI agents. The roadmap delivers it in six phases: first, the data models and scenario loading (so users can write and validate YAML); then a working adapter layer (so scenarios can run against real models); then the assertion engine (so runs produce scored results); then the N-trial runner and CLI (so users get reliability metrics from the terminal); then LLM judge evaluation (so users can define rubric-based assertions); and finally record/replay (so users can debug deterministically without API calls). Each phase produces a testable, standalone increment.
+Salvo is a CLI testing framework for multi-step AI agents. The roadmap delivers it in eight phases: first, the data models and scenario loading (so users can write and validate YAML); then a working adapter layer (so scenarios can run against real models); then the assertion engine (so runs produce scored results); then the N-trial runner and CLI (so users get reliability metrics from the terminal); then LLM judge evaluation (so users can define rubric-based assertions); then record/replay (so users can debug deterministically without API calls); and finally two gap closure phases that wire cross-phase integration (trace pipeline, config wiring) identified by the v1 milestone audit. Each phase produces a testable, standalone increment.
 
 ## Phases
 
@@ -17,7 +17,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Assertion Engine and Scoring** - All evaluator types, weighted scoring, tool call validation, and JMESPath queries (completed 2026-02-18)
 - [ ] **Phase 4: N-Trial Runner and CLI** - Run N times with isolation/concurrency, Rich CLI output, reporting, and CI exit codes
 - [ ] **Phase 5: LLM Judge Evaluation** - Rubric-based LLM judge assertions with k-voting
-- [ ] **Phase 6: Record and Replay** - Trace recording, deterministic replay, and re-evaluation with updated assertions
+- [x] **Phase 6: Record and Replay** - Trace recording, deterministic replay, and re-evaluation with updated assertions (completed 2026-02-19)
+- [ ] **Phase 7: Wire Trace Pipeline (Gap Closure)** - Wire trace_id in TrialRunner, fix trace persistence, inject _scenario in reeval
+- [ ] **Phase 8: Config Wiring and Defensive Hardening (Gap Closure)** - Wire JudgeConfig, normalize_assertions, ProjectConfig fields to CLI
 
 ## Phase Details
 
@@ -113,11 +115,39 @@ Plans:
 - [ ] 06-01-PLAN.md -- Recording infrastructure: RecordedTrace models, extended redaction with custom patterns, metadata_only mode, RecordingConfig, --record flag on `salvo run`, RunStore trace persistence
 - [ ] 06-02-PLAN.md -- Replay and re-evaluation CLI: `salvo replay` with [REPLAY] banner and (recorded) timing, `salvo reeval` with updated assertions and linked results
 
+### Phase 7: Wire Trace Pipeline (Gap Closure)
+**Goal**: The recording/replay/reeval pipeline works end-to-end in production — trace_id is assigned during trial execution, traces are persisted, and reeval has full context
+**Depends on**: Phase 6
+**Requirements**: RECD-01, RECD-02, RECD-03, CLI-04, JUDG-01
+**Gap Closure**: Closes INT-01 (critical), INT-03 (moderate) from v1 audit
+**Success Criteria** (what must be TRUE):
+  1. `salvo run --record` persists trace files to `.salvo/traces/` with valid trace_id on each TrialResult
+  2. `salvo replay <run_id>` loads and replays a previously recorded trace without API calls
+  3. `salvo reeval <run_id>` re-evaluates with updated assertions including judge assertions (with _scenario injected)
+**Plans**: 1 plan
+
+Plans:
+- [ ] 07-01-PLAN.md -- Wire trace_id in TrialRunner, fix run_cmd trace persistence, inject _scenario in reeval_cmd
+
+### Phase 8: Config Wiring and Defensive Hardening (Gap Closure)
+**Goal**: Project-level configuration (judge defaults, storage dir, default adapter/model) is respected by all CLI commands, and assertion normalization is defensive
+**Depends on**: Phase 7
+**Requirements**: JUDG-01, JUDG-02, EVAL-01, SCEN-02, CLI-05
+**Gap Closure**: Closes INT-02 (significant), INT-04 (moderate), INT-05 (minor) from v1 audit
+**Success Criteria** (what must be TRUE):
+  1. `salvo.yaml` judge settings (model, k, temperature) are loaded and passed to JudgeEvaluator
+  2. TrialRunner calls normalize_assertions before evaluation (defensive against programmatic Scenario construction)
+  3. ProjectConfig fields (storage_dir, default_adapter, default_model) are consumed by CLI commands
+**Plans**: 1 plan
+
+Plans:
+- [ ] 08-01-PLAN.md -- Wire JudgeConfig to evaluator, add normalize_assertions in TrialRunner, wire ProjectConfig fields to CLI
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
-Note: Phases 5 and 6 depend on Phase 4 but not on each other.
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
+Note: Phases 5 and 6 depend on Phase 4 but not on each other. Phases 7-8 are gap closure phases from v1 audit.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -126,4 +156,6 @@ Note: Phases 5 and 6 depend on Phase 4 but not on each other.
 | 3. Assertion Engine and Scoring | 0/2 | Complete    | 2026-02-18 |
 | 4. N-Trial Runner and CLI | 0/3 | Not started | - |
 | 5. LLM Judge Evaluation | 0/2 | Not started | - |
-| 6. Record and Replay | 0/? | Not started | - |
+| 6. Record and Replay | 0/? | Complete    | 2026-02-19 |
+| 7. Wire Trace Pipeline | 0/1 | Not started | - |
+| 8. Config Wiring and Defensive Hardening | 0/1 | Not started | - |

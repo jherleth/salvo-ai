@@ -9,9 +9,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Scenario Definition
 
-- [ ] **SCEN-01**: User can define test scenarios in YAML (adapter, model, tools, assertions, threshold)
-- [ ] **SCEN-02**: Scenario YAML is validated against schema with helpful error messages on invalid input
-- [ ] **SCEN-03**: User can specify system prompt and user message per scenario
+- [x] **SCEN-01**: User can define test scenarios in YAML (adapter, model, tools, assertions, threshold)
+- [x] **SCEN-02**: Scenario YAML is validated against schema with helpful error messages on invalid input
+- [x] **SCEN-03**: User can specify system prompt and user message per scenario
 
 ### Execution
 
@@ -50,11 +50,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### CLI & Storage
 
-- [ ] **CLI-01**: `salvo init` scaffolds a new project with example scenario
+- [x] **CLI-01**: `salvo init` scaffolds a new project with example scenario
 - [x] **CLI-02**: `salvo run` executes scenarios with rich terminal output (tables, colors, pass rates)
 - [x] **CLI-03**: `salvo report` shows historical run summaries with failure filtering
 - [x] **CLI-04**: `salvo replay` replays a recorded run with optional re-evaluation
-- [ ] **CLI-05**: All run data stored as JSON files in `.salvo/` directory
+- [x] **CLI-05**: All run data stored as JSON files in `.salvo/` directory
 - [x] **CLI-06**: CLI exits with non-zero code on failure for CI/CD integration
 
 ## v2 Requirements
@@ -102,9 +102,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SCEN-01 | Phase 1 | Pending |
-| SCEN-02 | Phase 1 | Pending |
-| SCEN-03 | Phase 1 | Pending |
+| SCEN-01 | Phase 1 | Complete |
+| SCEN-02 | Phase 1, Phase 8 | Pending |
+| SCEN-03 | Phase 1 | Complete |
 | EXEC-01 | Phase 4 | Complete |
 | EXEC-02 | Phase 4 | Complete |
 | EXEC-03 | Phase 4 | Complete |
@@ -112,7 +112,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ADPT-01 | Phase 2 | Complete |
 | ADPT-02 | Phase 2 | Complete |
 | ADPT-03 | Phase 2 | Complete |
-| EVAL-01 | Phase 3 | Complete |
+| EVAL-01 | Phase 3, Phase 8 | Pending |
 | EVAL-02 | Phase 3 | Complete |
 | EVAL-03 | Phase 3 | Complete |
 | EVAL-04 | Phase 3 | Complete |
@@ -120,23 +120,24 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EVAL-06 | Phase 3 | Complete |
 | EVAL-07 | Phase 3 | Complete |
 | EVAL-08 | Phase 4 | Complete |
-| JUDG-01 | Phase 5 | Complete |
-| JUDG-02 | Phase 5 | Complete |
-| RECD-01 | Phase 6 | Complete |
-| RECD-02 | Phase 6 | Complete |
-| RECD-03 | Phase 6 | Complete |
-| CLI-01 | Phase 1 | Pending |
+| JUDG-01 | Phase 5, Phase 7, Phase 8 | Pending |
+| JUDG-02 | Phase 5, Phase 8 | Pending |
+| RECD-01 | Phase 6, Phase 7 | Pending |
+| RECD-02 | Phase 6, Phase 7 | Pending |
+| RECD-03 | Phase 6, Phase 7 | Pending |
+| CLI-01 | Phase 1 | Complete |
 | CLI-02 | Phase 4 | Complete |
 | CLI-03 | Phase 4 | Complete |
-| CLI-04 | Phase 6 | Complete |
-| CLI-05 | Phase 1 | Pending |
+| CLI-04 | Phase 6, Phase 7 | Pending |
+| CLI-05 | Phase 1, Phase 8 | Pending |
 | CLI-06 | Phase 4 | Complete |
 
 **Coverage:**
 - v1 requirements: 29 total
 - Mapped to phases: 29
 - Unmapped: 0
+- Pending (gap closure): 9
 
 ---
 *Requirements defined: 2026-02-17*
-*Last updated: 2026-02-17 after roadmap creation*
+*Last updated: 2026-02-19 after gap closure phase creation*
